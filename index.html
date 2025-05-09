@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Diario Madrid - 1788</title>
+    <title>Diario de Madrid - 1788</title>
     <!-- PDF.js para visualizar PDFs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     <style>
@@ -323,7 +323,7 @@
         <div class="nav-section">
             <!-- Listado de noticias -->
             <div class="content-navigation">
-                <h3>Noticias del día</h3>
+                <h3>Noticias musicales</h3>
                 <ul class="news-list" id="news-list">
                     <li><a href="#" data-index="0">Cargando...</a></li>
                 </ul>
@@ -394,7 +394,7 @@
                 // Cargar el archivo JSON real
                 sidebarLoader.style.display = 'block';
                 
-                const response = await fetch('data.json');
+                const response = await fetch('combined.json');
                 if (!response.ok) {
                     throw new Error(`Error al cargar datos: ${response.status}`);
                 }
@@ -420,11 +420,11 @@
         function populateDateSelect() {
             dateSelect.innerHTML = '';
             
-            if (allData && allData.datos && allData.datos.length > 0) {
-                allData.datos.forEach((entry, index) => {
+            if (allData && allData.ejemplares && allData.ejemplares.length > 0) {
+                allData.ejemplares.forEach((entry, index) => {
                     const option = document.createElement('option');
                     option.value = index;
-                    option.textContent = entry.fecha;
+                    option.textContent = entry.fecha_periodico;
                     dateSelect.appendChild(option);
                 });
             }
@@ -432,18 +432,18 @@
 
         // Cargar una entrada específica
         function loadEntry(index) {
-            if (!allData || !allData.datos || index < 0 || index >= allData.datos.length) {
+            if (!allData || !allData.ejemplares || index < 0 || index >= allData.ejemplares.length) {
                 return;
             }
             
             currentEntryIndex = index;
             dateSelect.value = index;
             
-            const entry = allData.datos[index];
+            const entry = allData.ejemplares[index];
             
             // Actualizar información de la página
             document.querySelector('.date').textContent = `Año ${allData.Año}`;
-            pageInfo.textContent = `Mostrando: Diario Mercantil - ${entry.fecha}`;
+            pageInfo.textContent = `Mostrando: Diario de Madrid - ${entry.fecha_periodico}`;
             
             // Actualizar lista de noticias
             updateNewsList(entry);
@@ -452,7 +452,7 @@
             loadPDF(entry.PDF);
             
             // Si hay noticias, cargar la primera
-            if (entry.noticias && entry.noticias.length > 0) {
+            if (entry.noticias_musicales && entry.noticias_musicales.length > 0) {
                 loadNews(0);
             }
         }
@@ -461,12 +461,16 @@
         function updateNewsList(entry) {
             newsList.innerHTML = '';
             
-            if (entry.noticias && entry.noticias.length > 0) {
-                entry.noticias.forEach((news, index) => {
+            if (entry.noticias_musicales && entry.noticias_musicales.length > 0) {
+                entry.noticias_musicales.forEach((news, index) => {
                     const li = document.createElement('li');
                     const a = document.createElement('a');
                     a.href = '#';
-                    a.textContent = news.título || `Noticia ${index + 1}`;
+                    
+                    // Obtener un extracto del texto para mostrar como título
+                    const textSnippet = news.texto_completo.substring(0, 40) + (news.texto_completo.length > 40 ? '...' : '');
+                    a.textContent = `Noticia ${index + 1}: ${textSnippet}`;
+                    
                     a.setAttribute('data-index', index);
                     
                     if (index === 0) {
@@ -485,64 +489,47 @@
                         this.classList.add('active');
                     });
                     
-                    // Si hay sección, mostrarla
-                    if (news.sección) {
-                        const p = document.createElement('p');
-                        p.textContent = `Sección: ${news.sección}`;
-                        li.appendChild(p);
-                    }
-                    
                     li.appendChild(a);
                     newsList.appendChild(li);
                 });
             } else {
                 const li = document.createElement('li');
-                li.textContent = 'No hay noticias disponibles';
+                li.textContent = 'No hay noticias musicales disponibles';
                 newsList.appendChild(li);
             }
         }
 
         // Cargar noticia específica
         function loadNews(index) {
-            if (!allData || !allData.datos || currentEntryIndex < 0 || currentEntryIndex >= allData.datos.length) {
+            if (!allData || !allData.ejemplares || currentEntryIndex < 0 || currentEntryIndex >= allData.ejemplares.length) {
                 return;
             }
             
-            const entry = allData.datos[currentEntryIndex];
+            const entry = allData.ejemplares[currentEntryIndex];
             
-            if (!entry.noticias || index < 0 || index >= entry.noticias.length) {
+            if (!entry.noticias_musicales || index < 0 || index >= entry.noticias_musicales.length) {
                 return;
             }
             
             currentNewsIndex = index;
-            const news = entry.noticias[index];
+            const news = entry.noticias_musicales[index];
             
             // Actualizar contenido de la noticia
             let htmlContent = '';
             
-            htmlContent += `<h2>${news.título || 'Noticia sin título'}</h2>`;
-            
-            if (news.sección) {
-                htmlContent += `<h3>Sección: ${news.sección}</h3>`;
-            }
-            
-            htmlContent += `<p>${news.contenido}</p>`;
+            htmlContent += `<h2>Noticia musical ${news.id}</h2>`;
+            htmlContent += `<p>${news.texto_completo}</p>`;
             
             // Metadatos
             htmlContent += `<div class="meta">`;
             
-            if (news.PDF || news.pdf) {
-                const pdfPage = news.PDF || news.pdf;
-                htmlContent += `<p>Página ${pdfPage} del periódico</p>`;
+            if (news.pagina) {
+                htmlContent += `<p>Página ${news.pagina} del periódico</p>`;
                 
                 // Ir a la página correspondiente en el PDF
-                if (pdfDoc && !isNaN(parseInt(pdfPage))) {
-                    queueRenderPage(parseInt(pdfPage));
+                if (pdfDoc && !isNaN(parseInt(news.pagina))) {
+                    queueRenderPage(parseInt(news.pagina));
                 }
-            }
-            
-            if (news.Periódico || news.periódico) {
-                htmlContent += `<p>Periódico nº ${news.Periódico || news.periódico}</p>`;
             }
             
             htmlContent += `</div>`;
@@ -651,7 +638,7 @@
 
         // Ir a la entrada siguiente
         function onNextEntry() {
-            if (allData && allData.datos && currentEntryIndex < allData.datos.length - 1) {
+            if (allData && allData.ejemplares && currentEntryIndex < allData.ejemplares.length - 1) {
                 loadEntry(currentEntryIndex + 1);
             }
         }
