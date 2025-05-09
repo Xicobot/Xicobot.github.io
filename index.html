@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Diario de Madrid - 1788</title>
+    <title>Diario del Debate</title>
     <!-- PDF.js para visualizar PDFs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     <style>
@@ -305,7 +305,7 @@
 </head>
 <body>
     <header>
-        <h1>Diario de Madrid</h1>
+        <h1>Diario del debate</h1>
         <p class="subtitle">Versión Digital de la Colección Histórica</p>
         <p class="date">1788</p>
     </header>
@@ -394,7 +394,7 @@
                 // Cargar el archivo JSON real
                 sidebarLoader.style.display = 'block';
                 
-                const response = await fetch('data.json');
+                const response = await fetch('combined.json');
                 if (!response.ok) {
                     throw new Error(`Error al cargar datos: ${response.status}`);
                 }
@@ -443,7 +443,7 @@
             
             // Actualizar información de la página
             document.querySelector('.date').textContent = `Año ${allData.Año}`;
-            pageInfo.textContent = `Mostrando: Diario de Madrid - ${entry.fecha_periodico}`;
+            pageInfo.textContent = `Mostrando: Diario del debate - ${entry.fecha_periodico}`;
             
             // Actualizar lista de noticias
             updateNewsList(entry);
