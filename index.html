@@ -91,7 +91,7 @@
         }
 
         .nav-section {
-            flex: 0 0 250px; /* Ancho fijo para el panel izquierdo */
+            flex: 0 0 300px; /* Ancho aumentado para el panel izquierdo */
             order: 1;
         }
 
@@ -151,6 +151,8 @@
             padding: 20px;
             border-radius: 5px;
             margin-bottom: 20px;
+            max-height: 800px;
+            overflow-y: auto;
         }
 
         .news-content h2 {
@@ -165,6 +167,8 @@
         .news-content p {
             margin-bottom: 15px;
             line-height: 1.7;
+            white-space: pre-wrap;
+            text-align: justify;
         }
 
         .news-content .meta {
@@ -267,6 +271,39 @@
             background-color: #f8f5ef;
             color: #5c4b3c;
             font-family: Georgia, serif;
+        }
+
+        /* Botón de copiar */
+        .copy-button {
+            background-color: #d6c9b6;
+            border: 1px solid #b3a38f;
+            padding: 5px 10px;
+            margin-top: 10px;
+            cursor: pointer;
+            font-family: Georgia, serif;
+            font-size: 14px;
+            color: #5c4b3c;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .copy-button:hover {
+            background-color: #c9b8a3;
+        }
+        
+        .copy-button:before {
+            content: "📋";
+            margin-right: 5px;
+        }
+        
+        .copy-notification {
+            display: none;
+            margin-left: 10px;
+            color: #4a7c59;
+            font-style: italic;
+            font-size: 14px;
         }
 
         /* Responsive */
@@ -388,6 +425,33 @@
         const newsContent = document.getElementById('news-content');
         const pageInfo = document.getElementById('page-info');
 
+        // Función para copiar texto al portapapeles
+        function copyToClipboard(text) {
+            // Crear elemento temporal
+            const tempElement = document.createElement('textarea');
+            tempElement.value = text;
+            tempElement.setAttribute('readonly', '');
+            tempElement.style.position = 'absolute';
+            tempElement.style.left = '-9999px';
+            document.body.appendChild(tempElement);
+            
+            // Seleccionar y copiar el texto
+            tempElement.select();
+            document.execCommand('copy');
+            
+            // Eliminar el elemento temporal
+            document.body.removeChild(tempElement);
+            
+            // Mostrar notificación
+            const notification = document.getElementById('copy-notification');
+            notification.style.display = 'inline';
+            
+            // Ocultar la notificación después de 2 segundos
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 2000);
+        }
+
         // Cargar datos del JSON
         async function loadData() {
             try {
@@ -467,8 +531,10 @@
                     const a = document.createElement('a');
                     a.href = '#';
                     
-                    // Obtener un extracto del texto para mostrar como título
-                    const textSnippet = news.texto_completo.substring(0, 40) + (news.texto_completo.length > 40 ? '...' : '');
+                    // Obtener primeras palabras del texto para mostrar como título (sin truncar con "...")
+                    const words = news.texto_completo.split(' ');
+                    // Tomar las primeras 8 palabras como máximo para el título
+                    const textSnippet = words.slice(0, 8).join(' ') + (words.length > 8 ? '...' : '');
                     a.textContent = `Noticia ${index + 1}: ${textSnippet}`;
                     
                     a.setAttribute('data-index', index);
@@ -514,11 +580,19 @@
             currentNewsIndex = index;
             const news = entry.noticias_musicales[index];
             
-            // Actualizar contenido de la noticia
+            // Asegurarse de que tenemos el texto completo
+            let fullText = news.texto_completo || '';
+            
+            // Actualizar contenido de la noticia - asegurando que se muestra todo el texto
             let htmlContent = '';
             
             htmlContent += `<h2>Noticia musical ${news.id}</h2>`;
-            htmlContent += `<p>${news.texto_completo}</p>`;
+            // Mostramos el texto completo, sin ningún tipo de truncamiento
+            htmlContent += `<p style="white-space: pre-wrap;">${fullText}</p>`;
+            
+            // Añadir botón de copiar
+            htmlContent += `<button id="copy-button" class="copy-button">Copiar texto</button>`;
+            htmlContent += `<span id="copy-notification" class="copy-notification">¡Texto copiado!</span>`;
             
             // Metadatos
             htmlContent += `<div class="meta">`;
@@ -535,6 +609,16 @@
             htmlContent += `</div>`;
             
             newsContent.innerHTML = htmlContent;
+            
+            // Añadir evento al botón de copiar
+            document.getElementById('copy-button').addEventListener('click', function() {
+                copyToClipboard(fullText);
+            });
+            
+            // Imprimir en consola para depuración
+            console.log("Texto cargado (longitud):", fullText.length);
+            console.log("Primeros 100 caracteres:", fullText.substring(0, 100));
+            console.log("Últimos 100 caracteres:", fullText.substring(fullText.length - 100));
         }
 
         // Función para cargar un PDF
