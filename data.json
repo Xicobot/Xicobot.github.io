@@ -751,6 +751,7 @@
   "PDF": "1788-01-31.pdf"
 }
 ,
+
 {
   "noticias_musicales": [
     {
@@ -760,8 +761,7 @@
     }
   ],
   "total_noticias": 1,
-  "fecha_periodico": "VIERNES 1 DE FEBRERO DE 1788",
-  "PDF": "1788-02-01.pdf"
+  "fecha_periodico": "VIERNES 1 DE FEBRERO DE 1788"
 }
 ,
 {
