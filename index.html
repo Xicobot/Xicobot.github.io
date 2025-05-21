@@ -6,6 +6,7 @@
     <title>Diario de Madrid - 1788</title>
     <!-- PDF.js para visualizar PDFs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    <!-- Todos los estilos se mantienen exactamente igual -->
     <style>
         /* Estilos generales */
         body {
@@ -425,7 +426,7 @@
         const newsContent = document.getElementById('news-content');
         const pageInfo = document.getElementById('page-info');
 
-        // Nueva función para normalizar fechas utilizando el nombre del PDF
+        // Función corregida para normalizar fechas usando el nombre del PDF
         function normalizeDateFromPDF(pdfFilename) {
             // Formato esperado: YYYY-MM-DD.pdf
             const match = pdfFilename.match(/(\d{4})-(\d{2})-(\d{2})\.pdf/);
@@ -435,11 +436,8 @@
             }
             
             const year = match[1];
-            const month = match[2];
-            const day = match[3];
-            
-            // Crear objeto Date para formatear correctamente
-            const date = new Date(`${year}-${month}-${day}T00:00:00`);
+            const month = parseInt(match[2], 10) - 1; // Convertir a número y restar 1 (0-11)
+            const day = parseInt(match[3], 10);      // Convertir a número
             
             // Nombres de los meses en español
             const monthNames = [
@@ -447,8 +445,8 @@
                 "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
             ];
             
-            // Formatear como "DD de [mes] de YYYY"
-            return `${date.getDate()} de ${monthNames[date.getMonth()]} de ${date.getFullYear()}`;
+            // Formatear como "DD de [mes] de YYYY" - Usando directamente los valores numéricos
+            return `${day} de ${monthNames[month]} de ${year}`;
         }
 
         // Función para copiar texto al portapapeles
@@ -665,7 +663,7 @@
             console.log("Últimos 100 caracteres:", fullText.substring(fullText.length - 100));
         }
 
-        // Función para cargar un PDF
+        // Función mejorada para cargar un PDF
         function loadPDF(url) {
             pdfLoader.style.display = 'block';
             
@@ -674,8 +672,13 @@
             
             console.log("Intentando cargar PDF:", pdfUrl);
             
-            // Cargar documento PDF
-            pdfjsLib.getDocument(pdfUrl).promise.then(function(pdf) {
+            // Cargar documento PDF con opciones mejoradas
+            pdfjsLib.getDocument({
+                url: pdfUrl,
+                cMapUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/cmaps/',
+                cMapPacked: true,
+                standardFontDataUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/standard_fonts/'
+            }).promise.then(function(pdf) {
                 pdfDoc = pdf;
                 pageCounter.textContent = `Página ${pageNum} de ${pdf.numPages}`;
                 
@@ -685,7 +688,7 @@
             }).catch(function(error) {
                 console.error('Error al cargar el PDF:', error);
                 pdfLoader.style.display = 'none';
-                document.getElementById('pdf-container').innerHTML = '<p>Error al cargar el PDF. Asegúrate de que el archivo existe en la carpeta pdfs/.</p>';
+                document.getElementById('pdf-container').innerHTML = '<p style="padding: 20px; color: #8b7d6b;">Error al cargar el PDF. Asegúrate de que el archivo existe en la carpeta pdfs/.</p>';
             });
         }
 
