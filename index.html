@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Diario de Madrid - 1788</title>
-    <!-- PDF.js para visualizar PDFs -->
+    <title>Diario de Madrid</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     <style>
         /* Estilos generales */
@@ -12,7 +11,7 @@
             font-family: 'Georgia', serif;
             background-color: #f5f2e9;
             color: #333;
-            max-width: 1600px; /* Aumentado para más espacio */
+            max-width: 1600px;
             margin: 0 auto;
             padding: 20px;
             line-height: 1.6;
@@ -91,7 +90,7 @@
         }
 
         .nav-section {
-            flex: 0 0 300px; /* Ancho aumentado para el panel izquierdo */
+            flex: 0 0 300px;
             order: 1;
         }
 
@@ -180,13 +179,13 @@
 
         .pdf-display {
             flex: 1;
-            min-width: 750px; /* Más ancho para el PDF */
+            min-width: 750px;
             order: 2;
         }
 
         #pdf-container {
             width: 100%;
-            height: 1000px; /* Aumentado para mejor visualización */
+            height: 1000px;
             border: 1px solid #b3a38f;
             background-color: #fff;
             overflow: auto;
@@ -306,6 +305,17 @@
             font-size: 14px;
         }
 
+        /* Error message */
+        .error-message {
+            padding: 15px;
+            background-color: #fff3f3;
+            border: 1px solid #ffcaca;
+            border-radius: 5px;
+            color: #d85050;
+            margin: 20px 0;
+            text-align: center;
+        }
+
         /* Responsive */
         @media (max-width: 1200px) {
             .main-content {
@@ -342,9 +352,9 @@
 </head>
 <body>
     <header>
-        <h1>Diario de Madrid</h1>
+        <h1>DIARIO DE MADRID</h1>
         <p class="subtitle">Versión Digital de la Colección Histórica</p>
-        <p class="date">1788</p>
+        <p class="date" id="year-display">Año 1788</p>
     </header>
 
     <div class="navigation">
@@ -358,7 +368,6 @@
     <div class="main-content">
         <!-- Sección izquierda: Navegación y contenido de las noticias -->
         <div class="nav-section">
-            <!-- Listado de noticias -->
             <div class="content-navigation">
                 <h3>Noticias musicales</h3>
                 <ul class="news-list" id="news-list">
@@ -367,7 +376,6 @@
                 <div class="loader" id="sidebar-loader"></div>
             </div>
             
-            <!-- Contenido de la noticia seleccionada -->
             <div class="news-content" id="news-content">
                 <h2>Seleccione una noticia</h2>
                 <p>Haga clic en una noticia del panel superior para ver su contenido.</p>
@@ -412,7 +420,7 @@
         let pageNum = 1;
         let pageRendering = false;
         let pageNumPending = null;
-        let scale = 1.2; // Escala inicial aumentada para mejor visualización
+        let scale = 1.2;
         let canvas = document.getElementById('pdf-canvas');
         let ctx = canvas.getContext('2d');
         
@@ -424,10 +432,45 @@
         const newsList = document.getElementById('news-list');
         const newsContent = document.getElementById('news-content');
         const pageInfo = document.getElementById('page-info');
+        const yearDisplay = document.getElementById('year-display');
+
+        // Función para normalizar fechas desde el nombre del PDF
+        function normalizeDateFromPDF(pdfFilename) {
+            if (!pdfFilename) return null;
+            
+            let match;
+            let day, month, year;
+            
+            // Intenta el formato DD-MM-YYYY.pdf (ej: 02-01-1788.pdf)
+            match = pdfFilename.match(/(\d{2})-(\d{2})-(\d{4})\.pdf/);
+            if (match) {
+                day = parseInt(match[1], 10);
+                month = parseInt(match[2], 10);
+                year = match[3];
+            } else {
+                // Intenta el formato YYYY-MM-DD.pdf (ej: 1788-01-02.pdf)
+                match = pdfFilename.match(/(\d{4})-(\d{2})-(\d{2})\.pdf/);
+                if (match) {
+                    year = match[1];
+                    month = parseInt(match[2], 10);
+                    day = parseInt(match[3], 10);
+                } else {
+                    return null; // No pudo reconocer el formato
+                }
+            }
+            
+            // Nombres de los meses en español
+            const monthNames = [
+                "enero", "febrero", "marzo", "abril", "mayo", "junio",
+                "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+            ];
+            
+            // Formatear como "DD de [mes] de YYYY"
+            return `${day} de ${monthNames[month - 1]} de ${year}`;
+        }
 
         // Función para copiar texto al portapapeles
         function copyToClipboard(text) {
-            // Crear elemento temporal
             const tempElement = document.createElement('textarea');
             tempElement.value = text;
             tempElement.setAttribute('readonly', '');
@@ -435,18 +478,14 @@
             tempElement.style.left = '-9999px';
             document.body.appendChild(tempElement);
             
-            // Seleccionar y copiar el texto
             tempElement.select();
             document.execCommand('copy');
             
-            // Eliminar el elemento temporal
             document.body.removeChild(tempElement);
             
-            // Mostrar notificación
             const notification = document.getElementById('copy-notification');
             notification.style.display = 'inline';
             
-            // Ocultar la notificación después de 2 segundos
             setTimeout(() => {
                 notification.style.display = 'none';
             }, 2000);
@@ -455,7 +494,6 @@
         // Cargar datos del JSON
         async function loadData() {
             try {
-                // Cargar el archivo JSON real
                 sidebarLoader.style.display = 'block';
                 
                 const response = await fetch('data.json');
@@ -465,11 +503,18 @@
                 
                 allData = await response.json();
                 
+                // Actualizar el año en la interfaz
+                if (allData && allData.Año) {
+                    yearDisplay.textContent = `Año ${allData.Año}`;
+                }
+                
                 // Cargar lista de fechas en el selector
                 populateDateSelect();
                 
                 // Cargar la primera entrada
-                loadEntry(0);
+                if (allData && allData.ejemplares && allData.ejemplares.length > 0) {
+                    loadEntry(0);
+                }
                 
                 sidebarLoader.style.display = 'none';
                 
@@ -488,7 +533,18 @@
                 allData.ejemplares.forEach((entry, index) => {
                     const option = document.createElement('option');
                     option.value = index;
-                    option.textContent = entry.fecha_periodico;
+                    
+                    // Usar la fecha normalizada si existe un PDF
+                    let displayDate = entry.fecha_periodico || "Fecha desconocida";
+                    
+                    if (entry.PDF) {
+                        const normalizedDate = normalizeDateFromPDF(entry.PDF);
+                        if (normalizedDate) {
+                            displayDate = normalizedDate;
+                        }
+                    }
+                    
+                    option.textContent = displayDate;
                     dateSelect.appendChild(option);
                 });
             }
@@ -505,19 +561,37 @@
             
             const entry = allData.ejemplares[index];
             
-            // Actualizar información de la página
-            document.querySelector('.date').textContent = `Año ${allData.Año}`;
-            pageInfo.textContent = `Mostrando: Diario de Madrid - ${entry.fecha_periodico}`;
+            // Actualizar año en la interfaz
+            if (allData && allData.Año) {
+                yearDisplay.textContent = `Año ${allData.Año}`;
+            }
+            
+            // Usar fecha formateada si está disponible
+            let displayDate = entry.fecha_periodico || "Fecha desconocida";
+            if (entry.PDF) {
+                const normalizedDate = normalizeDateFromPDF(entry.PDF);
+                if (normalizedDate) {
+                    displayDate = normalizedDate;
+                }
+            }
+            
+            pageInfo.textContent = `Mostrando: Diario de Madrid - ${displayDate}`;
             
             // Actualizar lista de noticias
             updateNewsList(entry);
             
             // Cargar el PDF
-            loadPDF(entry.PDF);
+            if (entry.PDF) {
+                loadPDF(entry.PDF);
+            } else {
+                document.getElementById('pdf-container').innerHTML = '<div class="error-message">No hay PDF disponible para esta entrada.</div>';
+            }
             
             // Si hay noticias, cargar la primera
             if (entry.noticias_musicales && entry.noticias_musicales.length > 0) {
                 loadNews(0);
+            } else {
+                newsContent.innerHTML = '<h2>No hay noticias disponibles</h2><p>No se encontraron noticias musicales para esta fecha.</p>';
             }
         }
 
@@ -531,9 +605,8 @@
                     const a = document.createElement('a');
                     a.href = '#';
                     
-                    // Obtener primeras palabras del texto para mostrar como título (sin truncar con "...")
+                    // Obtener primeras palabras del texto para mostrar como título
                     const words = news.texto_completo.split(' ');
-                    // Tomar las primeras 8 palabras como máximo para el título
                     const textSnippet = words.slice(0, 8).join(' ') + (words.length > 8 ? '...' : '');
                     a.textContent = `Noticia ${index + 1}: ${textSnippet}`;
                     
@@ -583,11 +656,10 @@
             // Asegurarse de que tenemos el texto completo
             let fullText = news.texto_completo || '';
             
-            // Actualizar contenido de la noticia - asegurando que se muestra todo el texto
+            // Actualizar contenido de la noticia
             let htmlContent = '';
             
             htmlContent += `<h2>Noticia musical ${news.id}</h2>`;
-            // Mostramos el texto completo, sin ningún tipo de truncamiento
             htmlContent += `<p style="white-space: pre-wrap;">${fullText}</p>`;
             
             // Añadir botón de copiar
@@ -596,6 +668,17 @@
             
             // Metadatos
             htmlContent += `<div class="meta">`;
+            
+            // Usar fecha formateada para los metadatos
+            let displayDate = entry.fecha_periodico || "Fecha desconocida";
+            if (entry.PDF) {
+                const normalizedDate = normalizeDateFromPDF(entry.PDF);
+                if (normalizedDate) {
+                    displayDate = normalizedDate;
+                }
+            }
+            
+            htmlContent += `<p>Fecha: ${displayDate}</p>`;
             
             if (news.pagina) {
                 htmlContent += `<p>Página ${news.pagina} del periódico</p>`;
@@ -614,19 +697,19 @@
             document.getElementById('copy-button').addEventListener('click', function() {
                 copyToClipboard(fullText);
             });
-            
-            // Imprimir en consola para depuración
-            console.log("Texto cargado (longitud):", fullText.length);
-            console.log("Primeros 100 caracteres:", fullText.substring(0, 100));
-            console.log("Últimos 100 caracteres:", fullText.substring(fullText.length - 100));
         }
 
         // Función para cargar un PDF
-        function loadPDF(url) {
+        function loadPDF(pdfFilename) {
+            if (!pdfFilename) {
+                document.getElementById('pdf-container').innerHTML = '<div class="error-message">No hay PDF disponible para esta entrada.</div>';
+                return;
+            }
+            
             pdfLoader.style.display = 'block';
             
-            // Usar la ruta a la carpeta pdfs
-            const pdfUrl = `pdfs/${url}`;
+            // Construir la URL del PDF
+            const pdfUrl = `pdfs/${pdfFilename}`;
             
             console.log("Intentando cargar PDF:", pdfUrl);
             
@@ -641,7 +724,17 @@
             }).catch(function(error) {
                 console.error('Error al cargar el PDF:', error);
                 pdfLoader.style.display = 'none';
-                document.getElementById('pdf-container').innerHTML = '<p>Error al cargar el PDF. Asegúrate de que el archivo existe en la carpeta pdfs/.</p>';
+                
+                document.getElementById('pdf-container').innerHTML = `
+                    <div class="error-message">
+                        <p><strong>Error al cargar el PDF:</strong> ${pdfFilename}</p>
+                        <p>Asegúrate de que:</p>
+                        <ul style="text-align: left; list-style-type: disc; padding-left: 30px;">
+                            <li>El archivo existe en la carpeta pdfs/</li>
+                            <li>El nombre del archivo coincide exactamente con el especificado en los datos JSON</li>
+                            <li>El servidor web tiene permisos para acceder a la carpeta pdfs/</li>
+                        </ul>
+                    </div>`;
             });
         }
 
@@ -754,7 +847,7 @@
         });
 
         document.getElementById('zoom-reset').addEventListener('click', function() {
-            scale = 1.2; // Valor inicial aumentado para mejor visualización
+            scale = 1.2;
             queueRenderPage(pageNum);
         });
 
