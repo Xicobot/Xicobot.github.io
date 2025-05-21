@@ -425,29 +425,6 @@
         const newsContent = document.getElementById('news-content');
         const pageInfo = document.getElementById('page-info');
 
-        // Función corregida para normalizar fechas utilizando el nombre del PDF
-        function normalizeDateFromPDF(pdfFilename) {
-            // Formato esperado: YYYY-MM-DD.pdf
-            const match = pdfFilename.match(/(\d{4})-(\d{2})-(\d{2})\.pdf/);
-            
-            if (!match) {
-                return "Fecha desconocida";
-            }
-            
-            const year = match[1];
-            const month = parseInt(match[2], 10) - 1; // Convertir a número y restar 1 (0-11)
-            const day = parseInt(match[3], 10);      // Convertir a número
-            
-            // Nombres de los meses en español
-            const monthNames = [
-                "enero", "febrero", "marzo", "abril", "mayo", "junio",
-                "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
-            ];
-            
-            // Formatear como "DD de [mes] de YYYY" - Usando directamente los valores numéricos
-            return `${day} de ${monthNames[month]} de ${year}`;
-        }
-
         // Función para copiar texto al portapapeles
         function copyToClipboard(text) {
             // Crear elemento temporal
@@ -475,85 +452,18 @@
             }, 2000);
         }
 
-        // Cargar datos del JSON con mejor manejo de errores
+        // Cargar datos del JSON
         async function loadData() {
             try {
+                // Cargar el archivo JSON real
                 sidebarLoader.style.display = 'block';
                 
-                // Intenta cargar el archivo JSON con una ruta más flexible
-                let response;
-                try {
-                    // Primero intentamos con la ruta relativa
-                    response = await fetch('data.json');
-                    if (!response.ok) {
-                        // Si falla, intentamos con ruta desde la raíz
-                        response = await fetch('/data.json');
-                    }
-                    if (!response.ok) {
-                        // Si aún falla, intentamos desde el directorio superior
-                        response = await fetch('../data.json');
-                    }
-                    if (!response.ok) {
-                        throw new Error(`Error al cargar datos: ${response.status}`);
-                    }
-                } catch (fetchError) {
-                    console.error('Error de fetch:', fetchError);
-                    
-                    // Si todos los intentos fallan, cargamos los datos de ejemplo
-                    console.warn('Usando datos de ejemplo como fallback');
-                    allData = {
-                        "Año": "1788",
-                        "ejemplares": [
-                            {
-                                "noticias_musicales": [
-                                    {"id": 1, "texto_completo": "La Congregacion de esclavos de Ntra. Sra. del Pilar...", "pagina": "4"},
-                                    {"id": 2, "texto_completo": "Teatros. Hoy no hay ópera. La entrada de antes de anoche fue de 4504 rs.", "pagina": "4"}
-                                ],
-                                "total_noticias": 2,
-                                "fecha_periodico": "2 de enero de 1788",
-                                "PDF": "1788-01-02.pdf"
-                            },
-                            {
-                                "noticias_musicales": [
-                                    {"id": 1, "texto_completo": "Hoy es la ópera intitulada: A quien de ageno se viste...", "pagina": "4"}
-                                ],
-                                "total_noticias": 1,
-                                "fecha_periodico": "3 de enero de 1788",
-                                "PDF": "1788-01-03.pdf"
-                            }
-                        ]
-                    };
-                    
-                    // Normalizar las fechas usando los nombres de PDF
-                    allData.ejemplares.forEach(entry => {
-                        entry.fecha_original = entry.fecha_periodico;
-                        if (entry.PDF) {
-                            entry.fecha_periodico = normalizeDateFromPDF(entry.PDF);
-                        }
-                    });
-                    
-                    populateDateSelect();
-                    loadEntry(0);
-                    sidebarLoader.style.display = 'none';
-                    return; // Salimos de la función ya que tenemos los datos cargados
+                const response = await fetch('data.json');
+                if (!response.ok) {
+                    throw new Error(`Error al cargar datos: ${response.status}`);
                 }
                 
-                // Si llegamos aquí, obtuvimos una respuesta exitosa
                 allData = await response.json();
-                
-                console.log("Datos cargados correctamente:", allData);
-                
-                // Normalizar las fechas utilizando los nombres de los PDF
-                if (allData && allData.ejemplares && allData.ejemplares.length > 0) {
-                    allData.ejemplares.forEach(entry => {
-                        entry.fecha_original = entry.fecha_periodico;
-                        if (entry.PDF) {
-                            entry.fecha_periodico = normalizeDateFromPDF(entry.PDF);
-                        }
-                    });
-                } else {
-                    console.error("Formato de datos incorrecto o vacío");
-                }
                 
                 // Cargar lista de fechas en el selector
                 populateDateSelect();
@@ -561,11 +471,12 @@
                 // Cargar la primera entrada
                 loadEntry(0);
                 
+                sidebarLoader.style.display = 'none';
+                
             } catch (error) {
                 console.error('Error cargando datos:', error);
-                alert('Error al cargar los datos. Por favor, intenta recargar la página.');
-            } finally {
                 sidebarLoader.style.display = 'none';
+                alert('Error al cargar los datos. Por favor, intenta recargar la página.');
             }
         }
 
@@ -596,8 +507,6 @@
             
             // Actualizar información de la página
             document.querySelector('.date').textContent = `Año ${allData.Año}`;
-            
-            // Usar la fecha normalizada en la información de la página
             pageInfo.textContent = `Mostrando: Diario de Madrid - ${entry.fecha_periodico}`;
             
             // Actualizar lista de noticias
@@ -688,9 +597,6 @@
             // Metadatos
             htmlContent += `<div class="meta">`;
             
-            // Añadir la fecha normalizada en los metadatos
-            htmlContent += `<p>Fecha: ${entry.fecha_periodico}</p>`;
-            
             if (news.pagina) {
                 htmlContent += `<p>Página ${news.pagina} del periódico</p>`;
                 
@@ -715,68 +621,28 @@
             console.log("Últimos 100 caracteres:", fullText.substring(fullText.length - 100));
         }
 
-        // Función mejorada para cargar un PDF
+        // Función para cargar un PDF
         function loadPDF(url) {
-            if (!url) {
-                console.error("URL del PDF no proporcionada");
-                document.getElementById('pdf-container').innerHTML = '<p style="padding: 20px; color: #8b7d6b;">PDF no disponible para esta entrada.</p>';
-                return;
-            }
-            
             pdfLoader.style.display = 'block';
             
-            // Intentar diferentes rutas para encontrar el PDF
-            const posiblesPaths = [
-                `pdfs/${url}`,           // Directorio pdfs/ en el mismo nivel
-                `/pdfs/${url}`,          // Desde la raíz
-                `../pdfs/${url}`,        // Un nivel arriba
-                `./pdfs/${url}`,         // Explícitamente en el directorio actual
-                url                      // URL directa (por si ya incluye la ruta)
-            ];
+            // Usar la ruta a la carpeta pdfs
+            const pdfUrl = `pdfs/${url}`;
             
-            console.log("Intentando cargar PDF, posibles rutas:", posiblesPaths);
+            console.log("Intentando cargar PDF:", pdfUrl);
             
-            // Función para intentar cargar el PDF con distintas rutas
-            function intentarCargarPDF(pathIndex) {
-                if (pathIndex >= posiblesPaths.length) {
-                    console.error('No se pudo cargar el PDF en ninguna ruta');
-                    pdfLoader.style.display = 'none';
-                    document.getElementById('pdf-container').innerHTML = `
-                        <p style="padding: 20px; color: #8b7d6b;">
-                            Error al cargar el PDF: ${url}. <br>
-                            Intenté las rutas: ${posiblesPaths.join(', ')}. <br>
-                            Asegúrate de que el archivo existe y está en la ubicación correcta.
-                        </p>`;
-                    return;
-                }
+            // Cargar documento PDF
+            pdfjsLib.getDocument(pdfUrl).promise.then(function(pdf) {
+                pdfDoc = pdf;
+                pageCounter.textContent = `Página ${pageNum} de ${pdf.numPages}`;
                 
-                const pdfUrl = posiblesPaths[pathIndex];
-                console.log(`Intentando cargar PDF desde: ${pdfUrl} (intento ${pathIndex+1}/${posiblesPaths.length})`);
-                
-                // Intentar cargar el PDF
-                pdfjsLib.getDocument({
-                    url: pdfUrl,
-                    cMapUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/cmaps/',
-                    cMapPacked: true,
-                    standardFontDataUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/standard_fonts/'
-                }).promise.then(function(pdf) {
-                    console.log(`PDF cargado correctamente desde: ${pdfUrl}`);
-                    pdfDoc = pdf;
-                    pageNum = 1;
-                    pageCounter.textContent = `Página ${pageNum} de ${pdf.numPages}`;
-                    
-                    // Renderizar primera página
-                    renderPage(pageNum);
-                    pdfLoader.style.display = 'none';
-                }).catch(function(error) {
-                    console.warn(`Error al cargar el PDF desde ${pdfUrl}:`, error);
-                    // Intentar con la siguiente ruta
-                    intentarCargarPDF(pathIndex + 1);
-                });
-            }
-            
-            // Comenzar intentos de carga
-            intentarCargarPDF(0);
+                // Renderizar primera página
+                renderPage(pageNum);
+                pdfLoader.style.display = 'none';
+            }).catch(function(error) {
+                console.error('Error al cargar el PDF:', error);
+                pdfLoader.style.display = 'none';
+                document.getElementById('pdf-container').innerHTML = '<p>Error al cargar el PDF. Asegúrate de que el archivo existe en la carpeta pdfs/.</p>';
+            });
         }
 
         // Renderizar página del PDF
