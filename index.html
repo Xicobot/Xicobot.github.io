@@ -425,6 +425,32 @@
         const newsContent = document.getElementById('news-content');
         const pageInfo = document.getElementById('page-info');
 
+        // Nueva función para normalizar fechas utilizando el nombre del PDF
+        function normalizeDateFromPDF(pdfFilename) {
+            // Formato esperado: YYYY-MM-DD.pdf
+            const match = pdfFilename.match(/(\d{4})-(\d{2})-(\d{2})\.pdf/);
+            
+            if (!match) {
+                return "Fecha desconocida";
+            }
+            
+            const year = match[1];
+            const month = match[2];
+            const day = match[3];
+            
+            // Crear objeto Date para formatear correctamente
+            const date = new Date(`${year}-${month}-${day}T00:00:00`);
+            
+            // Nombres de los meses en español
+            const monthNames = [
+                "enero", "febrero", "marzo", "abril", "mayo", "junio",
+                "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+            ];
+            
+            // Formatear como "DD de [mes] de YYYY"
+            return `${date.getDate()} de ${monthNames[date.getMonth()]} de ${date.getFullYear()}`;
+        }
+
         // Función para copiar texto al portapapeles
         function copyToClipboard(text) {
             // Crear elemento temporal
@@ -464,6 +490,19 @@
                 }
                 
                 allData = await response.json();
+                
+                // Normalizar las fechas utilizando los nombres de los PDF
+                if (allData && allData.ejemplares && allData.ejemplares.length > 0) {
+                    allData.ejemplares.forEach(entry => {
+                        // Guardar la fecha original por si acaso
+                        entry.fecha_original = entry.fecha_periodico;
+                        
+                        // Actualizar con la fecha normalizada
+                        if (entry.PDF) {
+                            entry.fecha_periodico = normalizeDateFromPDF(entry.PDF);
+                        }
+                    });
+                }
                 
                 // Cargar lista de fechas en el selector
                 populateDateSelect();
@@ -507,6 +546,8 @@
             
             // Actualizar información de la página
             document.querySelector('.date').textContent = `Año ${allData.Año}`;
+            
+            // Usar la fecha normalizada en la información de la página
             pageInfo.textContent = `Mostrando: Diario de Madrid - ${entry.fecha_periodico}`;
             
             // Actualizar lista de noticias
@@ -596,6 +637,9 @@
             
             // Metadatos
             htmlContent += `<div class="meta">`;
+            
+            // Añadir la fecha normalizada en los metadatos
+            htmlContent += `<p>Fecha: ${entry.fecha_periodico}</p>`;
             
             if (news.pagina) {
                 htmlContent += `<p>Página ${news.pagina} del periódico</p>`;
