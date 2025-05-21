@@ -491,6 +491,24 @@
             }, 2000);
         }
 
+        // NUEVA FUNCIÓN: Generar una ruta a PDF compatible con diferentes formatos
+        function generatePdfPath(pdfFilename) {
+            if (!pdfFilename) return null;
+            
+            // Si es un formato de fecha DD-MM-YYYY
+            const ddmmyyyyMatch = pdfFilename.match(/(\d{2})-(\d{2})-(\d{4})\.pdf/);
+            if (ddmmyyyyMatch) {
+                const day = ddmmyyyyMatch[1];
+                const month = ddmmyyyyMatch[2];
+                const year = ddmmyyyyMatch[3];
+                
+                // Generar formato año-mes-día como alternativa
+                return `${year}-${month}-${day}.pdf`;
+            }
+            
+            return pdfFilename;
+        }
+
         // Cargar datos del JSON
         async function loadData() {
             try {
@@ -708,8 +726,10 @@
             
             pdfLoader.style.display = 'block';
             
-            // Construir la URL del PDF
-            const pdfUrl = `pdfs/${pdfFilename}`;
+            // MODIFICADO: Intentar con formato alternativo de la fecha
+            // (convertir de DD-MM-YYYY a YYYY-MM-DD si es necesario)
+            const alternativePdfFilename = generatePdfPath(pdfFilename);
+            const pdfUrl = `pdfs/${alternativePdfFilename}`;
             
             console.log("Intentando cargar PDF:", pdfUrl);
             
@@ -723,18 +743,46 @@
                 pdfLoader.style.display = 'none';
             }).catch(function(error) {
                 console.error('Error al cargar el PDF:', error);
-                pdfLoader.style.display = 'none';
                 
-                document.getElementById('pdf-container').innerHTML = `
-                    <div class="error-message">
-                        <p><strong>Error al cargar el PDF:</strong> ${pdfFilename}</p>
-                        <p>Asegúrate de que:</p>
-                        <ul style="text-align: left; list-style-type: disc; padding-left: 30px;">
-                            <li>El archivo existe en la carpeta pdfs/</li>
-                            <li>El nombre del archivo coincide exactamente con el especificado en los datos JSON</li>
-                            <li>El servidor web tiene permisos para acceder a la carpeta pdfs/</li>
-                        </ul>
-                    </div>`;
+                // Si falla con el formato alternativo, intentar con el original
+                if (alternativePdfFilename !== pdfFilename) {
+                    console.log("Intentando con formato original:", pdfFilename);
+                    const originalPdfUrl = `pdfs/${pdfFilename}`;
+                    
+                    pdfjsLib.getDocument(originalPdfUrl).promise.then(function(pdf) {
+                        pdfDoc = pdf;
+                        pageCounter.textContent = `Página ${pageNum} de ${pdf.numPages}`;
+                        renderPage(pageNum);
+                        pdfLoader.style.display = 'none';
+                    }).catch(function(secondError) {
+                        console.error('Error al cargar el PDF con formato original:', secondError);
+                        pdfLoader.style.display = 'none';
+                        
+                        document.getElementById('pdf-container').innerHTML = `
+                            <div class="error-message">
+                                <p><strong>Error al cargar el PDF:</strong> ${pdfFilename}</p>
+                                <p>También se intentó con: ${alternativePdfFilename}</p>
+                                <p>Asegúrate de que:</p>
+                                <ul style="text-align: left; list-style-type: disc; padding-left: 30px;">
+                                    <li>El archivo existe en la carpeta pdfs/</li>
+                                    <li>El nombre del archivo coincide exactamente con el especificado en los datos JSON</li>
+                                    <li>El servidor web tiene permisos para acceder a la carpeta pdfs/</li>
+                                </ul>
+                            </div>`;
+                    });
+                } else {
+                    pdfLoader.style.display = 'none';
+                    document.getElementById('pdf-container').innerHTML = `
+                        <div class="error-message">
+                            <p><strong>Error al cargar el PDF:</strong> ${pdfFilename}</p>
+                            <p>Asegúrate de que:</p>
+                            <ul style="text-align: left; list-style-type: disc; padding-left: 30px;">
+                                <li>El archivo existe en la carpeta pdfs/</li>
+                                <li>El nombre del archivo coincide exactamente con el especificado en los datos JSON</li>
+                                <li>El servidor web tiene permisos para acceder a la carpeta pdfs/</li>
+                            </ul>
+                        </div>`;
+                }
             });
         }
 
