@@ -338,24 +338,13 @@
                 justify-content: center;
             }
         }
-
-        /* Mensaje de error personalizado */
-        .error-message {
-            padding: 20px;
-            background-color: #fff3f3;
-            border: 1px solid #ffcaca;
-            border-radius: 5px;
-            color: #d85050;
-            margin-bottom: 20px;
-            text-align: center;
-        }
     </style>
 </head>
 <body>
     <header>
         <h1>Diario de Madrid</h1>
         <p class="subtitle">Versión Digital de la Colección Histórica</p>
-        <p class="date" id="year-display">1788</p>
+        <p class="date">1788</p>
     </header>
 
     <div class="navigation">
@@ -435,79 +424,22 @@
         const newsList = document.getElementById('news-list');
         const newsContent = document.getElementById('news-content');
         const pageInfo = document.getElementById('page-info');
-        const yearDisplay = document.getElementById('year-display');
-
-        // Datos de muestra para depuración y desarrollo
-        // Este es un objeto JSON simplificado que simula los datos que deberían cargarse
-        const sampleData = {
-            "Año": "1788",
-            "ejemplares": [
-                {
-                    "noticias_musicales": [
-                        {
-                            "id": 1,
-                            "texto_completo": "Conciertos. Esta noche á las 6 y media se repite en el Coliseo de los Caños del Peral el concierto que se compone de 2 partes. En la primera se dará principio con una obertura obligada á mayor número de instrumentos de D. Antonio Roseti: cantará una Aria la Sra. Juana Barlasina: otra la Sra. Lorenza Correa: otra la Sra. Catalina Tordesillas. Repetirá la Sra. Teresa Oltrabelli en virtud de orden particular, la Aria con su recitado instrumental, que cantó en el día 24 de Febrero próximo pasado, impulsada al mismo tiempo del favor que en su aplauso la dispensó entonces el Público, y del verdadero deseo que la asiste de complacerle. Cantará D. Miguel Hesser otra Aria de su composición. Después se tocará un concierto de Fagot y Clarinete de D. Carlos Stamit, por D. Carlos Caillet y D. Esteban Francois.",
-                            "pagina": "4"
-                        },
-                        {
-                            "id": 2,
-                            "texto_completo": "Volatines. La Compañía de Christobal Franco continua executando sus habilidades acostumbradas con un bayle nuevo, y pantomima. La entrada de ayer fue de 3154 rs.",
-                            "pagina": "4"
-                        }
-                    ],
-                    "total_noticias": 2,
-                    "fecha_periodico": "2 de marzo de 1788",
-                    "PDF": "1788-03-02.pdf"
-                },
-                {
-                    "noticias_musicales": [
-                        {
-                            "id": 1,
-                            "texto_completo": "Un clave se vende en la carrera de S. Gerónimo frente á la fonda, n. 25, qto. principal.",
-                            "pagina": "3"
-                        },
-                        {
-                            "id": 2,
-                            "texto_completo": "La Compañía de Christobal Franco continua executando sus habilidades acostumbradas con un bayle nuevo, y pantomima. La entrada de ayer fue de 4047 rs.",
-                            "pagina": "4"
-                        }
-                    ],
-                    "total_noticias": 2,
-                    "fecha_periodico": "3 de marzo de 1788",
-                    "PDF": "1788-03-03.pdf"
-                },
-                {
-                    "noticias_musicales": [
-                        {
-                            "id": 1,
-                            "texto_completo": "Lista de los Actores que componen las dos Compañías Cómicas que representarán en los Coliseos del Príncipe y de la Cruz, en la temporada del año cómico, que empezará en la Pasqua próxima de Resurrección, y concluirá en las Carnestolendas del año de 1789.",
-                            "pagina": "2"
-                        }
-                    ],
-                    "total_noticias": 1,
-                    "fecha_periodico": "4 de marzo de 1788",
-                    "PDF": "1788-03-04.pdf"
-                }
-            ]
-        };
 
         // Nueva función para normalizar fechas utilizando el nombre del PDF
         function normalizeDateFromPDF(pdfFilename) {
-            if (!pdfFilename) {
-                return "Fecha desconocida";
-            }
-            
             // Formato esperado: YYYY-MM-DD.pdf
             const match = pdfFilename.match(/(\d{4})-(\d{2})-(\d{2})\.pdf/);
             
             if (!match) {
-                console.warn("Formato de PDF no reconocido:", pdfFilename);
                 return "Fecha desconocida";
             }
             
             const year = match[1];
-            const month = parseInt(match[2], 10);
-            const day = parseInt(match[3], 10);
+            const month = match[2];
+            const day = match[3];
+            
+            // Crear objeto Date para formatear correctamente
+            const date = new Date(`${year}-${month}-${day}T00:00:00`);
             
             // Nombres de los meses en español
             const monthNames = [
@@ -516,7 +448,7 @@
             ];
             
             // Formatear como "DD de [mes] de YYYY"
-            return `${day} de ${monthNames[month - 1]} de ${year}`;
+            return `${date.getDate()} de ${monthNames[date.getMonth()]} de ${date.getFullYear()}`;
         }
 
         // Función para copiar texto al portapapeles
@@ -552,42 +484,25 @@
                 // Cargar el archivo JSON real
                 sidebarLoader.style.display = 'block';
                 
-                // Intentar cargar los datos del archivo
-                try {
-                    const response = await fetch('data.json');
-                    if (!response.ok) {
-                        throw new Error(`Error al cargar datos: ${response.status}`);
-                    }
-                    
-                    allData = await response.json();
-                } catch (error) {
-                    console.warn("Error al cargar datos.json, usando datos de muestra:", error);
-                    // Si hay un error, usar los datos de muestra
-                    allData = sampleData;
+                const response = await fetch('data.json');
+                if (!response.ok) {
+                    throw new Error(`Error al cargar datos: ${response.status}`);
                 }
                 
-                // Verificar la estructura de los datos
-                if (!allData || !allData.ejemplares || !Array.isArray(allData.ejemplares) || allData.ejemplares.length === 0) {
-                    throw new Error("El formato de los datos no es válido");
-                }
-                
-                // Establecer el año correcto
-                if (allData.Año) {
-                    yearDisplay.textContent = `Año ${allData.Año}`;
-                }
+                allData = await response.json();
                 
                 // Normalizar las fechas utilizando los nombres de los PDF
-                allData.ejemplares.forEach(entry => {
-                    // Guardar la fecha original por si acaso
-                    entry.fecha_original = entry.fecha_periodico;
-                    
-                    // Actualizar con la fecha normalizada usando el PDF si está disponible
-                    if (entry.PDF) {
-                        entry.fecha_normalizada = normalizeDateFromPDF(entry.PDF);
-                    } else {
-                        entry.fecha_normalizada = entry.fecha_periodico || "Fecha desconocida";
-                    }
-                });
+                if (allData && allData.ejemplares && allData.ejemplares.length > 0) {
+                    allData.ejemplares.forEach(entry => {
+                        // Guardar la fecha original por si acaso
+                        entry.fecha_original = entry.fecha_periodico;
+                        
+                        // Actualizar con la fecha normalizada
+                        if (entry.PDF) {
+                            entry.fecha_periodico = normalizeDateFromPDF(entry.PDF);
+                        }
+                    });
+                }
                 
                 // Cargar lista de fechas en el selector
                 populateDateSelect();
@@ -600,25 +515,7 @@
             } catch (error) {
                 console.error('Error cargando datos:', error);
                 sidebarLoader.style.display = 'none';
-                alert('Error al cargar los datos. Se han cargado datos de ejemplo para demostración.');
-                
-                // Cargar datos de muestra en caso de error
-                allData = sampleData;
-                
-                // Normalizar fechas en los datos de muestra
-                allData.ejemplares.forEach(entry => {
-                    entry.fecha_original = entry.fecha_periodico;
-                    if (entry.PDF) {
-                        entry.fecha_normalizada = normalizeDateFromPDF(entry.PDF);
-                    } else {
-                        entry.fecha_normalizada = entry.fecha_periodico || "Fecha desconocida";
-                    }
-                });
-                
-                // Cargar datos de muestra
-                populateDateSelect();
-                loadEntry(0);
-                sidebarLoader.style.display = 'none';
+                alert('Error al cargar los datos. Por favor, intenta recargar la página.');
             }
         }
 
@@ -630,8 +527,7 @@
                 allData.ejemplares.forEach((entry, index) => {
                     const option = document.createElement('option');
                     option.value = index;
-                    // Usar la fecha normalizada para el selector
-                    option.textContent = entry.fecha_normalizada;
+                    option.textContent = entry.fecha_periodico;
                     dateSelect.appendChild(option);
                 });
             }
@@ -649,12 +545,10 @@
             const entry = allData.ejemplares[index];
             
             // Actualizar información de la página
-            if (allData.Año) {
-                yearDisplay.textContent = `Año ${allData.Año}`;
-            }
+            document.querySelector('.date').textContent = `Año ${allData.Año}`;
             
-            // Usar la fecha normalizada para la información de la página
-            pageInfo.textContent = `Mostrando: Diario de Madrid - ${entry.fecha_normalizada}`;
+            // Usar la fecha normalizada en la información de la página
+            pageInfo.textContent = `Mostrando: Diario de Madrid - ${entry.fecha_periodico}`;
             
             // Actualizar lista de noticias
             updateNewsList(entry);
@@ -665,9 +559,6 @@
             // Si hay noticias, cargar la primera
             if (entry.noticias_musicales && entry.noticias_musicales.length > 0) {
                 loadNews(0);
-            } else {
-                // Si no hay noticias, mostrar mensaje informativo
-                newsContent.innerHTML = '<h2>No hay noticias</h2><p>No se encontraron noticias musicales para esta fecha.</p>';
             }
         }
 
@@ -681,7 +572,7 @@
                     const a = document.createElement('a');
                     a.href = '#';
                     
-                    // Obtener primeras palabras del texto para mostrar como título
+                    // Obtener primeras palabras del texto para mostrar como título (sin truncar con "...")
                     const words = news.texto_completo.split(' ');
                     // Tomar las primeras 8 palabras como máximo para el título
                     const textSnippet = words.slice(0, 8).join(' ') + (words.length > 8 ? '...' : '');
@@ -748,7 +639,7 @@
             htmlContent += `<div class="meta">`;
             
             // Añadir la fecha normalizada en los metadatos
-            htmlContent += `<p>Fecha: ${entry.fecha_normalizada}</p>`;
+            htmlContent += `<p>Fecha: ${entry.fecha_periodico}</p>`;
             
             if (news.pagina) {
                 htmlContent += `<p>Página ${news.pagina} del periódico</p>`;
@@ -767,19 +658,19 @@
             document.getElementById('copy-button').addEventListener('click', function() {
                 copyToClipboard(fullText);
             });
+            
+            // Imprimir en consola para depuración
+            console.log("Texto cargado (longitud):", fullText.length);
+            console.log("Primeros 100 caracteres:", fullText.substring(0, 100));
+            console.log("Últimos 100 caracteres:", fullText.substring(fullText.length - 100));
         }
 
         // Función para cargar un PDF
-        function loadPDF(pdfFilename) {
-            if (!pdfFilename) {
-                document.getElementById('pdf-container').innerHTML = '<div class="error-message">No hay PDF disponible para esta entrada.</div>';
-                return;
-            }
-            
+        function loadPDF(url) {
             pdfLoader.style.display = 'block';
             
-            // Usar la ruta a la carpeta pdfs 
-            const pdfUrl = `pdfs/${pdfFilename}`;
+            // Usar la ruta a la carpeta pdfs
+            const pdfUrl = `pdfs/${url}`;
             
             console.log("Intentando cargar PDF:", pdfUrl);
             
@@ -794,19 +685,7 @@
             }).catch(function(error) {
                 console.error('Error al cargar el PDF:', error);
                 pdfLoader.style.display = 'none';
-                
-                // Mensaje de error mejorado
-                document.getElementById('pdf-container').innerHTML = `
-                    <div class="error-message">
-                        <p><strong>Error al cargar el PDF:</strong> ${pdfFilename}</p>
-                        <p>Asegúrate de que:</p>
-                        <ul style="text-align: left; max-width: 80%; margin: 10px auto;">
-                            <li>El archivo existe en la carpeta pdfs/</li>
-                            <li>El nombre del archivo coincide exactamente con el especificado en los datos JSON</li>
-                            <li>El servidor web tiene permisos para acceder a la carpeta pdfs/</li>
-                        </ul>
-                        <p>Si estás usando este visualizador en un entorno de desarrollo local, asegúrate de usar un servidor web como http-server o similar.</p>
-                    </div>`;
+                document.getElementById('pdf-container').innerHTML = '<p>Error al cargar el PDF. Asegúrate de que el archivo existe en la carpeta pdfs/.</p>';
             });
         }
 
