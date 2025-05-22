@@ -514,7 +514,7 @@
             try {
                 sidebarLoader.style.display = 'block';
                 
-                const response = await fetch('data.json');
+                const response = await fetch('combined.json');
                 if (!response.ok) {
                     throw new Error(`Error al cargar datos: ${response.status}`);
                 }
