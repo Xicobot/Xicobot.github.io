@@ -1,5 +1,5 @@
 {
-    "Año": "debate",
+    "Año": "Debate 1881-1883",
     "ejemplares": [
 {"PDF": "1881-09-01.pdf", 
   "noticias_musicales": [
@@ -15725,6 +15725,91 @@
   ],
   "total_noticias": 4,
   "fecha_periodico": "Martes 19 de Junio de 1883"
+},
+{"PDF": "El-Debate-Madrid-1881-1-9-1881.pdf", 
+  "noticias_musicales": [
+    {
+      "id": 1,
+      "texto_completo": "Anoche se verificó en los Jardines del Buen Retiro el beneficio del Sr. Eihuet. Posee este jóven tenor cualidades que le ha granjeado las simpatías del público que asiste á los espectáculos del Retiro, y que ayer demostró sobradamente. A pesar del viento frío que hacía un tanto desagradable la noche y deslucía la representación, las sillas se hallaban completamente ocupadas, sobre todo, cuando el Sr. Rihuet cantó con gusto y afinación una romanza italiana al final de la que fue llamado á la escena y recibió una corona. En las demás obras conocidas ya del público, fué también aplaudido. Una de estas se ponía anoche en escena por segunda vez, y el público la recibió mejor que el día del estreno, debido sin duda á que la ejecución fué más esmerada y se hicieron algunas atinadas correcciones en el libro. En efecto, el cuadro de costumbres ¡Viva el Puerto! por su animación y colorido, á pesar de que le falta bastante para ser presentado en escena con la propiedad que requiere, bien merece la benevolencia del público. Su autor, el Sr. D. Juan de Eguilaz, es ya conocido en los teatros andaluces por otras producciones del mismo género que cultiva con aprovechamiento. De la música nada diremos, porque su autor el maestro D. Isidoro Hernandez, sabido es que conoce como pocos el modo de dar sabor á las canciones populares, y arrancar el aplauso del público.",
+      "pagina": "4"
+    },
+    {
+      "id": 2,
+      "texto_completo": "JARDÍN DEL BUEN RETIRO.— 8 li2. — ¡Viva el puerto! -Artistas á cala.—Baile.—Los parientes del difunto.",
+      "pagina": "4"
+    },
+    {
+      "id": 3,
+      "texto_completo": "LICEO CAPELLANES.— 8 li2.—Gran concierto por la charanga de Arapiles.",
+      "pagina": "4"
+    },
+    {
+      "id": 4,
+      "texto_completo": "INFANTIL.- 8 li2.—Por un papel de fumar. —Engañan las apariencias.—Las hijas de Isidora.—Los maridos de la condesa.—Baile.",
+      "pagina": "4"
+    },
+    {
+      "id": 5,
+      "texto_completo": "TEATRO DE LOS RECREOS MATRITENSES.—(Fuencarral, núm. 98.)—9.—El rizo de doña Marta. —El oro y el moro.—El amante espíritu.—¡Cáscaras!—Baile en rodos los intermedios.",
+      "pagina": "4"
+    }
+  ],
+  "total_noticias": 5,
+  "fecha_periodico": "Madrid, 1º de Setiembre de 1881"
+},
+{"PDF": "El-Debate-Madrid-1881-2-9-1881.pdf", 
+  "noticias_musicales": [
+    {
+      "id": 1,
+      "texto_completo": "JARDÍN DEL BUEN RETIRO.— 8 li2. — Concierto veinte de la Union Artístico-Musical, bajo la dirección del maestro Sr. Chapí.",
+      "pagina": "4"
+    },
+    {
+      "id": 2,
+      "texto_completo": "LICEO CAPELLANES.— 8 li2.—Gran concierto por la charanga de Arapiles.",
+      "pagina": "4"
+    },
+    {
+      "id": 3,
+      "texto_completo": "TEATRO DE TIVOLI.—(En el Dos de Mayo). —8.—Los dos viejos.—Genaro el gondolero ó el hada voladora.—La espada de fuego.—Segundo acto de la misma.—Baile.",
+      "pagina": "4"
+    },
+    {
+      "id": 4,
+      "texto_completo": "CIRCO DE PRICE.— 9 li4.—El casamiento de Aladino ó el robo de la princesa Bul-Buf, segunda parte de la Lámpara maravillosa, desempeñada por 250 niños.",
+      "pagina": "4"
+    }
+  ],
+  "total_noticias": 4,
+  "fecha_periodico": "Madrid, 2 de Setiembre de 1881"
+},
+
+{
+  "noticias_musicales": [
+    {
+      "id": 1,
+      "texto_completo": "JARDÍN DEL BUEN RETIRO.- 8 1|2. - D. Abdón y D. Senén.—Baile.—Torear por lo fino.—Concierto vocal é instrumental en el kiosco.",
+      "pagina": "4"
+    },
+    {
+      "id": 2,
+      "texto_completo": "LICEO CAPELLANES.- 8 1|2. —Amor de viuda.—El Liceo de Capellanes.—Sensitiva.",
+      "pagina": "4"
+    },
+    {
+      "id": 3,
+      "texto_completo": "El elegante teatro de Lara inaugurará sus tareas el próximo martes, poniendo en escena la comedia de Mira'ín, La Mojigata, y el gracioso saínete, Café de la Libertad.",
+      "pagina": "4"
+    }
+  ],
+  "total_noticias": 3,
+  "fecha_periodico": "Madrid, 3 de Setiembre de 1881"
+}
+,
+{"PDF": "El-Debate-Madrid-1881-4-9-1881.pdf", 
+  "noticias_musicales": [],
+  "total_noticias": 0,
+  "fecha_periodico": "4 de Setiembre de 1881"
 }
     ]
 }
