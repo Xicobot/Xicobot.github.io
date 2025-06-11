@@ -1,0 +1,66 @@
+[
+  {
+    "Año": 1792,
+    "ejemplares": [
+      {
+        "noticias_musicales": [
+          {
+            "id": 1,
+            "texto_completo": "Hoy á las 6 y 3/4, en el Coliseo de los Caños del Peral, se representa por la Compañía Italiana la Opera seria intitulada: La Fidra, con quatro bayles análogos á ella. La entrada de antes de anoche fue de 5380.",
+            "pagina": "4"
+          },
+          {
+            "id": 2,
+            "texto_completo": "En el de la calle de la Cruz, por la Compañia de Martínez, se representa la Comedia titulada: La Sortija de Venus, tercera parte, de Teatro, con saynete y dos tonadillas, á las 4, y 3/4. La entrada de ayer fue de 2244.",
+            "pagina": "4"
+          },
+          {
+            "id": 3,
+            "texto_completo": "En el de la calle del Principe por la Compañía de Ribera, se representa la Comedia titulada: Jerusalen conquistada nueva, de Teatro, con saynete, y dos tonadillas, la una nueva, á las 4 y 3/4. La entrada de ayer fue de 3282.",
+            "pagina": "4"
+          },
+          {
+            "id": 4,
+            "texto_completo": "El Aleman baylará la Inglesa con la mayor destreza, y volteará su Caballo por uno y otro lado.",
+            "pagina": "4"
+          }
+        ],
+        "total_noticias": 4,
+        "fecha_periodico": "DOMINGO 1 DE ENERO DE 1792",
+        "PDF": "1792-01-01.pdf"
+      }
+    ]
+  },
+  {
+    "Año": 1800,
+    "ejemplares": [
+      {
+        "noticias_musicales": [
+          {
+            "id": 1,
+            "texto_completo": "Hoy si el tiempo lo permitiere es la quinta función eqüestre, de las que por la compañía de Juan Gadiz, unida á la de Domingo Cambon, se han de celebrar en la Plaza de los Toros, fuera de la puerta de Alcalá, con el piadoso fin de que parte de su producto se invierta en la curación de los enfermos de los Reales Hospitales General y Pasion de esta Corte. Mandará y presidirá la Plaza el Sr. D. Juan de Morales Guzman y Továr, Corregidor de esta Villa. Se empezará por un paseo general, para saludar al Magistrado y Público, con un gran coro de música de la de los Suizos y de Zaragoza. Los tres picadores, el Negro, el Asturiano y el Girondino se esmerarán en trabajar sobre sus caballos, con varias posturas, pasos y saltos, no dudando que su conato merecerá la aprobación del público. Domingo Cambon cogerá con ligereza un relox del suelo á carrera tendida; baylará sobre dos caballos con la jóven Musanita, su muger; el niño de siete años se exercitará; y formará la compañía una pirámide de 7 personas sobre 3 caballos. Juan Gadiz executará la diversion del payo, la de la posta inglesa, saltará las quatro cintas, y enseguida la cuba, esmerandose en dar gusto por varios pasos de agilidad y presteza. Se concluirá la funcion con el divertido del saco. Se han baxado los precios, y son los siguientes: cada balcon 80 rs. cada asiento de grada cubierta 6, y en el tendido 2. Se empezará la funcion á las 3½ de la tarde.",
+            "pagina": "2"
+          },
+          {
+            "id": 2,
+            "texto_completo": "Hoy en la diversión de química económica casera de la calle del Olivo alto, casa de la Soledad, se empezará por la adoración de los Stos. Reyes, las bodas de Laureno, el bayle de la maroma, y el bayle bolero: en la lección de física se demostrará el modo de limpiar los uniformes de paño blanco, y el modo de quitar las manchas de hierro á todo género blanco de hilo y algodón.",
+            "pagina": "3"
+          },
+          {
+            "id": 3,
+            "texto_completo": "En el de la calle del Principe por la Compañia del Sr. Francisco Ramos, se representa la Comedia titulada Dar la vida por su Amor, y Fénix de las Mugeres ó la Alceste, de mitología; concluido el segundo acto se cantará una tonadilla á tres por la Sra. Laureana Correa, y los Sres. Vicente Camas y Eusebio Fernandez; seguirá el 3.º acto, y acabado que sea habrá otra tonadilla á quatro, que la cantarán la Sra. Vicenta Laporta, y los Sres. Vicente Camas, Francisco Ramos y Miguel Garrido el que imitará al muñuelero; finalizando toda la función con un saynete alusivo al tiempo, en el que baylarán el Zorongo la Señora Antonia Prado y el Señor Josef González. Todo nuevo de Teatro. Para esta función se ha dispuesto un magnífico teatro compuesto de varias transformaciones, y ademas hay tres decoraciones nuevas pintadas por D. Antonio María Tadey: á las 4½. La entrada de antes de ayer fue de 7556.",
+            "pagina": "4"
+          },
+          {
+            "id": 4,
+            "texto_completo": "En el de la calle de la Cruz por la Compañia del Sr. Luis Navarro se representa la Comedia titulada: Los Sueños de Josef vendido á los Ismaelitas, y mas feliz Cautiverio; con una tonadilla general, nueva, y por fin de fiesta el celebre saynete de Don Ramon de la Cruz, titulado la Plaza Mayor de Madrid por Navidad; de teatro, dispuesto por el referido Don Antonio Tadey; á las 4½. La entrada de antes de ayer fue de 7086.",
+            "pagina": "4"
+          }
+        ],
+        "total_noticias": 4,
+        "fecha_periodico": "1 de enero de 1800",
+        "PDF": "1800-01-01.pdf"
+      }
+    ]
+  }
+]
