@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noticias Musicales Históricas - Navegador</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            line-height: 1.6;
+            color: #2c3e50;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #8b4513;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .loading {
+            text-align: center;
+            color: #666;
+            font-size: 1.2em;
+            padding: 50px;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .filters-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .filters-title {
+            color: #8b4513;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #d4ac0d;
+            padding-bottom: 10px;
+        }
+
+        .search-container {
+            margin-bottom: 25px;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 15px 20px;
+            font-size: 1.1em;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            outline: none;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .search-box:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 15px rgba(52, 152, 219, 0.3);
+            background: white;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .filter-label {
+            font-weight: bold;
+            color: #8b4513;
+            font-size: 1.1em;
+        }
+
+        .year-filters, .month-filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: #ecf0f1;
+            border: 2px solid #bdc3c7;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            color: #2c3e50;
+        }
+
+        .filter-btn:hover {
+            background: #d5dbdb;
+            transform: translateY(-1px);
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border-color: #2980b9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .clear-filters {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .clear-filters:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .content-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .content-title {
+            color: #8b4513;
+            font-size: 1.8em;
+            margin-bottom: 25px;
+            border-left: 5px solid #d4ac0d;
+            padding-left: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .results-count {
+            font-size: 0.8em;
+            color: #666;
+            font-weight: normal;
+        }
+
+        .noticias-container {
+            display: grid;
+            gap: 20px;
+        }
+
+        .noticia {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            border-left: 5px solid #3498db;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .noticia:hover {
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .noticia.highlighted {
+            border-left-color: #f39c12;
+            background: linear-gradient(135deg, #fff3cd, #fef9e7);
+        }
+
+        .noticia-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .noticia-meta {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .noticia-badge {
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            font-weight: bold;
+            color: white;
+        }
+
+        .badge-id {
+            background: #3498db;
+        }
+
+        .badge-year {
+            background: #8b4513;
+        }
+
+        .badge-month {
+            background: #27ae60;
+        }
+
+        .badge-page {
+            background: #95a5a6;
+        }
+
+        .badge-date {
+            background: #9b59b6;
+        }
+
+        .noticia-texto {
+            line-height: 1.8;
+            text-align: justify;
+            font-size: 1.05em;
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: bold;
+            color: #8b4513;
+        }
+
+        .no-results {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 50px;
+            font-size: 1.2em;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 2px dashed #ddd;
+        }
+
+        .chart-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .chart-title {
+            color: #8b4513;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #d4ac0d;
+            padding-bottom: 10px;
+        }
+
+        .chart-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .chart-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chart-control label {
+            font-weight: bold;
+            color: #8b4513;
+        }
+
+        .chart-control input[type="number"] {
+            padding: 8px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            width: 80px;
+        }
+
+        .chart-control input[type="checkbox"] {
+            transform: scale(1.2);
+        }
+
+        .chart-container {
+            height: 500px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .word-bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 8px;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .word-bar:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        .word-label {
+            min-width: 120px;
+            font-weight: bold;
+            font-size: 0.9em;
+            color: #2c3e50;
+        }
+
+        .word-progress {
+            flex: 1;
+            height: 25px;
+            background: #ecf0f1;
+            border-radius: 12px;
+            margin: 0 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .word-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border-radius: 12px;
+            transition: width 0.8s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            color: white;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .word-count {
+            min-width: 40px;
+            font-weight: bold;
+            color: #8b4513;
+            font-size: 1.1em;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .filter-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .year-filters, .month-filters {
+                justify-content: center;
+            }
+            
+            .content-title {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .chart-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .word-label {
+                min-width: 100px;
+                font-size: 0.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📰 Noticias Musicales Históricas</h1>
+            <p>Navegador y buscador de hallazgos en periódicos históricos</p>
+        </div>
+
+        <div id="loadingMessage" class="loading">
+            🔄 Cargando datos del archivo combined.json...
+        </div>
+
+        <div id="errorMessage" class="error" style="display: none;">
+            ❌ Error al cargar los datos. Asegúrate de que el archivo combined.json esté disponible.
+        </div>
+
+        <div id="mainContent" style="display: none;">
+            <div class="filters-section">
+                <h2 class="filters-title">🔍 Búsqueda y Filtros</h2>
+                
+                <div class="search-container">
+                    <input type="text" id="searchBox" class="search-box" 
+                           placeholder="🔍 Buscar palabras en las noticias... (ej: Opera, Comedia, bayle, Teatro) - Case Sensitive">
+                </div>
+
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <div class="filter-label">📅 Filtrar por Año:</div>
+                        <div class="year-filters" id="yearFilters">
+                            <!-- Se llenarán dinámicamente -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <div class="filter-label">📆 Filtrar por Mes:</div>
+                        <div class="month-filters" id="monthFilters">
+                            <!-- Se llenarán dinámicamente -->
+                        </div>
+                    </div>
+                    <button class="clear-filters" onclick="clearAllFilters()">🗑️ Limpiar Filtros</button>
+                </div>
+
+                <div class="stats-row" id="statsRow">
+                    <div class="stat-card">
+                        <div class="stat-number" id="visibleCount">0</div>
+                        <div class="stat-label">Noticias visibles</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalCount">0</div>
+                        <div class="stat-label">Total noticias</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="yearsCount">0</div>
+                        <div class="stat-label">Años disponibles</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="datesCount">0</div>
+                        <div class="stat-label">Fechas con datos</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <div class="content-title">
+                    <span>📖 Noticias Musicales</span>
+                    <span class="results-count" id="resultsCount"></span>
+                </div>
+                <div class="noticias-container" id="noticiasContainer">
+                    <!-- Se llenarán dinámicamente -->
+                </div>
+            </div>
+
+            <div class="chart-section">
+                <h2 class="chart-title">📊 Análisis de Palabras</h2>
+                
+                <div class="chart-controls">
+                    <div class="chart-control">
+                        <label for="minLength">Longitud mínima:</label>
+                        <input type="number" id="minLength" value="4" min="1" max="20">
+                    </div>
+                    <div class="chart-control">
+                        <label for="topWords">Mostrar top:</label>
+                        <input type="number" id="topWords" value="20" min="5" max="50">
+                    </div>
+                    <div class="chart-control">
+                        <label for="caseSensitive">Case Sensitive:</label>
+                        <input type="checkbox" id="caseSensitive" checked>
+                    </div>
+                    <button class="clear-filters" onclick="updateWordChart()" style="margin-left: auto;">🔄 Actualizar Gráfica</button>
+                </div>
+
+                <div class="chart-container" id="chartContainer">
+                    <!-- Se llenará dinámicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let datosHistoricos = [];
+        let allNoticias = [];
+        let filteredNoticias = [];
+        let activeFilters = {
+            years: new Set(),
+            months: new Set(),
+            searchTerm: ''
+        };
+
+        const mesesNombres = [
+            'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+            'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+        ];
+
+        // Función para cargar datos del JSON externo
+        async function loadData() {
+            try {
+                const response = await fetch('combined.json');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                datosHistoricos = await response.json();
+                
+                document.getElementById('loadingMessage').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+                
+                processData();
+                generateFilters();
+                setupEventListeners();
+                renderFilteredNoticias();
+                updateStats();
+                updateWordChart();
+                
+            } catch (error) {
+                console.error('Error al cargar combined.json:', error);
+                document.getElementById('loadingMessage').style.display = 'none';
+                document.getElementById('errorMessage').style.display = 'block';
+                document.getElementById('errorMessage').innerHTML = 
+                    `❌ Error al cargar los datos: ${error.message}<br>Asegúrate de que el archivo combined.json esté disponible en el mismo directorio.`;
+            }
+        }
+
+        function processData() {
+            allNoticias = [];
+            datosHistoricos.forEach(yearData => {
+                yearData.ejemplares.forEach(ejemplar => {
+                    ejemplar.noticias_musicales.forEach(noticia => {
+                        allNoticias.push({
+                            ...noticia,
+                            año: yearData.Año,
+                            fecha_periodico: ejemplar.fecha_periodico || '',
+                            pdf: ejemplar.PDF || ''
+                        });
+                    });
+                });
+            });
+            filteredNoticias = [...allNoticias];
+        }
+
+        function generateFilters() {
+            // Generar filtros de años
+            const years = [...new Set(allNoticias.map(n => n.año))].sort();
+            const yearFilters = document.getElementById('yearFilters');
+            
+            years.forEach(year => {
+                const btn = document.createElement('button');
+                btn.className = 'filter-btn';
+                btn.textContent = year;
+                btn.onclick = () => toggleYearFilter(year, btn);
+                yearFilters.appendChild(btn);
+            });
+
+            // Generar filtros de meses (basado en fechas disponibles)
+            const availableDates = [...new Set(allNoticias.map(n => n.fecha_periodico))];
+            const availableMonths = new Set();
+            
+            availableDates.forEach(fecha => {
+                if (fecha) {
+                    const fechaLower = fecha.toLowerCase();
+                    mesesNombres.forEach(mes => {
+                        if (fechaLower.includes(mes)) {
+                            availableMonths.add(mes);
+                        }
+                    });
+                }
+            });
+
+            const monthFilters = document.getElementById('monthFilters');
+            mesesNombres.forEach(month => {
+                if (availableMonths.has(month)) {
+                    const btn = document.createElement('button');
+                    btn.className = 'filter-btn';
+                    btn.textContent = month.charAt(0).toUpperCase() + month.slice(1);
+                    btn.onclick = () => toggleMonthFilter(month, btn);
+                    monthFilters.appendChild(btn);
+                }
+            });
+        }
+
+        function setupEventListeners() {
+            const searchBox = document.getElementById('searchBox');
+            searchBox.addEventListener('input', (e) => {
+                activeFilters.searchTerm = e.target.value;
+                applyFilters();
+            });
+        }
+
+        function toggleYearFilter(year, btn) {
+            if (activeFilters.years.has(year)) {
+                activeFilters.years.delete(year);
+                btn.classList.remove('active');
+            } else {
+                activeFilters.years.add(year);
+                btn.classList.add('active');
+            }
+            applyFilters();
+        }
+
+        function toggleMonthFilter(month, btn) {
+            if (activeFilters.months.has(month)) {
+                activeFilters.months.delete(month);
+                btn.classList.remove('active');
+            } else {
+                activeFilters.months.add(month);
+                btn.classList.add('active');
+            }
+            applyFilters();
+        }
+
+        function clearAllFilters() {
+            activeFilters = {
+                years: new Set(),
+                months: new Set(),
+                searchTerm: ''
+            };
+            
+            document.getElementById('searchBox').value = '';
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            applyFilters();
+        }
+
+        function applyFilters() {
+            filteredNoticias = allNoticias.filter(noticia => {
+                // Filtro por año
+                if (activeFilters.years.size > 0 && !activeFilters.years.has(noticia.año)) {
+                    return false;
+                }
+                
+                // Filtro por mes
+                if (activeFilters.months.size > 0) {
+                    const fechaLower = (noticia.fecha_periodico || '').toLowerCase();
+                    const hasMonth = Array.from(activeFilters.months).some(month => 
+                        fechaLower.includes(month)
+                    );
+                    if (!hasMonth) {
+                        return false;
+                    }
+                }
+                
+                // Filtro por búsqueda (case sensitive)
+                if (activeFilters.searchTerm && 
+                    !noticia.texto_completo.includes(activeFilters.searchTerm)) {
+                    return false;
+                }
+                
+                return true;
+            });
+            
+            renderFilteredNoticias();
+            updateStats();
+        }
+
+        function renderFilteredNoticias() {
+            const container = document.getElementById('noticiasContainer');
+            
+            if (filteredNoticias.length === 0) {
+                container.innerHTML = '<div class="no-results">🔍 No se encontraron noticias que coincidan con los filtros aplicados</div>';
+                return;
+            }
+            
+            container.innerHTML = '';
+            
+            filteredNoticias.forEach(noticia => {
+                const noticiaDiv = document.createElement('div');
+                noticiaDiv.className = 'noticia';
+                
+                if (activeFilters.searchTerm) {
+                    noticiaDiv.classList.add('highlighted');
+                }
+                
+                const header = document.createElement('div');
+                header.className = 'noticia-header';
+                
+                const metaDiv = document.createElement('div');
+                metaDiv.className = 'noticia-meta';
+                
+                const badges = [
+                    { text: `ID: ${noticia.id}`, class: 'badge-id' },
+                    { text: noticia.año, class: 'badge-year' },
+                    { text: `Pág: ${noticia.pagina}`, class: 'badge-page' }
+                ];
+
+                if (noticia.fecha_periodico) {
+                    badges.push({ text: noticia.fecha_periodico, class: 'badge-date' });
+                }
+                
+                badges.forEach(badge => {
+                    const span = document.createElement('span');
+                    span.className = `noticia-badge ${badge.class}`;
+                    span.textContent = badge.text;
+                    metaDiv.appendChild(span);
+                });
+                
+                header.appendChild(metaDiv);
+                
+                const texto = document.createElement('div');
+                texto.className = 'noticia-texto';
+                
+                let textoCompleto = noticia.texto_completo;
+                if (activeFilters.searchTerm) {
+                    const searchTerm = activeFilters.searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    const regex = new RegExp(`(${searchTerm})`, 'g');
+                    textoCompleto = textoCompleto.replace(regex, '<span class="highlight">$1</span>');
+                }
+                texto.innerHTML = textoCompleto;
+                
+                noticiaDiv.appendChild(header);
+                noticiaDiv.appendChild(texto);
+                container.appendChild(noticiaDiv);
+            });
+        }
+
+        function updateStats() {
+            document.getElementById('visibleCount').textContent = filteredNoticias.length;
+            document.getElementById('totalCount').textContent = allNoticias.length;
+            document.getElementById('yearsCount').textContent = [...new Set(allNoticias.map(n => n.año))].length;
+            document.getElementById('datesCount').textContent = [...new Set(allNoticias.map(n => n.fecha_periodico))].filter(f => f).length;
+            
+            const resultsText = activeFilters.years.size > 0 || activeFilters.months.size > 0 || activeFilters.searchTerm 
+                ? `Mostrando ${filteredNoticias.length} de ${allNoticias.length} noticias`
+                : `${allNoticias.length} noticias totales`;
+            
+            document.getElementById('resultsCount').textContent = resultsText;
+        }
+
+        function updateWordChart() {
+            const minLength = parseInt(document.getElementById('minLength').value) || 4;
+            const topWords = parseInt(document.getElementById('topWords').value) || 20;
+            const caseSensitive = document.getElementById('caseSensitive').checked;
+            
+            // Obtener texto de noticias filtradas
+            const allText = filteredNoticias.map(n => n.texto_completo).join(' ');
+            
+            // Limpiar texto y dividir en palabras
+            const words = allText
+                .replace(/[.,;:!?¿¡()«»""''"\-\—]/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim()
+                .split(' ')
+                .filter(word => word.length >= minLength);
+            
+            // Contar palabras (case sensitive o insensitive)
+            const wordCount = {};
+            words.forEach(word => {
+                const key = caseSensitive ? word : word.toLowerCase();
+                wordCount[key] = (wordCount[key] || 0) + 1;
+            });
+            
+            // Ordenar y tomar top N
+            const sortedWords = Object.entries(wordCount)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, topWords);
+            
+            // Renderizar gráfica
+            renderWordChart(sortedWords);
+        }
+        
+        function renderWordChart(wordData) {
+            const container = document.getElementById('chartContainer');
+            container.innerHTML = '';
+            
+            if (wordData.length === 0) {
+                container.innerHTML = '<div class="no-results">📊 No hay suficientes palabras para mostrar</div>';
+                return;
+            }
+            
+            const maxCount = Math.max(...wordData.map(w => w[1]));
+            
+            wordData.forEach(([word, count], index) => {
+                const wordBar = document.createElement('div');
+                wordBar.className = 'word-bar';
+                
+                const label = document.createElement('div');
+                label.className = 'word-label';
+                label.textContent = word;
+                
+                const progressContainer = document.createElement('div');
+                progressContainer.className = 'word-progress';
+                
+                const fill = document.createElement('div');
+                fill.className = 'word-fill';
+                const percentage = (count / maxCount) * 100;
+                fill.style.width = `${percentage}%`;
+                
+                // Gradiente de colores según posición
+                const hue = 220 - (index * 180 / wordData.length);
+                fill.style.background = `linear-gradient(135deg, hsl(${hue}, 70%, 50%), hsl(${hue}, 70%, 40%))`;
+                
+                const countSpan = document.createElement('div');
+                countSpan.className = 'word-count';
+                countSpan.textContent = count;
+                
+                progressContainer.appendChild(fill);
+                wordBar.appendChild(label);
+                wordBar.appendChild(progressContainer);
+                wordBar.appendChild(countSpan);
+                container.appendChild(wordBar);
+            });
+        }
+
+        // Inicializar la aplicación
+        window.addEventListener('DOMContentLoaded', loadData);
+    </script>
+</body>
+</html>
