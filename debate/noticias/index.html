@@ -372,21 +372,107 @@
             margin-bottom: 10px;
             color: #333;
         }
+        
+        /* Mejoras para móvil */
         @media (max-width: 1200px) {
             .calendar-container-annual {
                 grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             }
         }
+        
         @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                max-width: 100%;
+                border-radius: 10px;
+            }
+            
             .main-content {
                 flex-direction: column;
             }
+            
             .left-panel {
                 width: 100%;
                 max-width: none;
+                border-right: none;
+                border-bottom: 1px solid #e9ecef;
+                padding: 15px;
             }
+            
+            .results-section {
+                padding: 15px;
+            }
+            
             .title {
-                font-size: 2rem;
+                font-size: 1.8rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            header {
+                padding: 20px;
+            }
+            
+            .calendar-container-annual {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .month-wrapper {
+                padding: 8px;
+            }
+            
+            .result-item {
+                padding: 15px;
+            }
+            
+            .results-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .results-title {
+                font-size: 1.3rem;
+            }
+            
+            .year-buttons {
+                gap: 3px;
+            }
+            
+            .year-btn {
+                padding: 5px 10px;
+                font-size: 11px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .title {
+                font-size: 1.5rem;
+            }
+            
+            .subtitle {
+                font-size: 0.9rem;
+            }
+            
+            .left-panel, .results-section {
+                padding: 10px;
+            }
+            
+            .calendar-day {
+                min-height: 25px;
+                font-size: 10px;
+            }
+            
+            .news-count {
+                width: 12px;
+                height: 12px;
+                font-size: 8px;
             }
         }
     </style>
@@ -490,6 +576,7 @@ async function loadData() {
 
 function initializeApp() {
     availableYears = allData.map(yearData => parseInt(yearData.Año)).sort((a, b) => a - b);
+    // Por defecto, todos los años están seleccionados
     selectedYears = [...availableYears];
     currentCalendarYear = availableYears[0];
     generateYearButtons();
@@ -509,10 +596,22 @@ function setupEventListeners() {
             executeSearch();
         }
     });
+    
+    // Event listener para búsqueda en tiempo real (opcional)
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+        // Opcional: búsqueda en tiempo real con debounce
+        clearTimeout(window.searchTimeout);
+        window.searchTimeout = setTimeout(() => {
+            executeSearch();
+        }, 300);
+    });
 }
 
 function executeSearch() {
     searchTerm = document.getElementById('searchInput').value;
+    // IMPORTANTE: Limpiar selección de día al hacer búsqueda
+    selectedDay = null;
+    document.querySelectorAll('.calendar-day.selected').forEach(el => el.classList.remove('selected'));
     performSearch();
 }
 
@@ -720,6 +819,11 @@ function selectDay(year, month, day, ejemplares) {
     }
 
     selectedDay = { year, month, day };
+    
+    // Limpiar búsqueda cuando se selecciona un día
+    searchTerm = '';
+    document.getElementById('searchInput').value = '';
+    
     currentResults = [];
     ejemplares.forEach(ejemplar => {
         ejemplar.noticias_musicales?.forEach(noticia => {
@@ -728,7 +832,7 @@ function selectDay(year, month, day, ejemplares) {
                 fecha_periodico: ejemplar.fecha_periodico,
                 PDF: ejemplar.PDF,
                 año: year,
-                searchTerms: searchTerm ? searchTerm.split(/\s+/).filter(Boolean) : []
+                searchTerms: []
             });
         });
     });
@@ -738,7 +842,7 @@ function selectDay(year, month, day, ejemplares) {
 
     const monthName = monthNames[month];
     const baseTitle = `Noticias del ${day} de ${monthName} de ${year}`;
-    document.getElementById('resultsTitle').textContent = searchTerm ? `${baseTitle} - Búsqueda: "${searchTerm}"` : baseTitle;
+    document.getElementById('resultsTitle').textContent = baseTitle;
 }
 
 function normalizeText(text) {
@@ -751,8 +855,19 @@ function matchesSearch(text, searchTerms) {
 }
 
 function performSearch() {
+    // Si hay un día seleccionado y no hay búsqueda, mostrar solo ese día
+    if (selectedDay && !searchTerm.trim()) {
+        // Los resultados ya están establecidos en selectDay()
+        displayResults();
+        updateStats();
+        generateCalendar();
+        return;
+    }
+    
+    // Si hay búsqueda, limpiar selección de día y buscar en todo
     const searchTermsArray = searchTerm.trim() ? searchTerm.split(/\s+/).filter(Boolean) : null;
     currentResults = [];
+    
     allData.forEach(yearData => {
         const yearValue = parseInt(yearData.Año);
         if (!selectedYears.includes(yearValue)) return;
@@ -763,119 +878,4 @@ function performSearch() {
                         ...noticia,
                         fecha_periodico: ejemplar.fecha_periodico,
                         PDF: ejemplar.PDF,
-                        año: yearData.Año,
-                        searchTerms: searchTermsArray || []
-                    });
-                }
-            });
-        });
-    });
-    displayResults();
-    updateStats();
-    generateCalendar();
-    document.getElementById('resultsTitle').textContent = searchTerm ? `Resultados de búsqueda: "${searchTerm}"` : 'Todas las Noticias';
-    if (searchTerm) {
-        selectedDay = null;
-        document.querySelectorAll('.calendar-day.selected').forEach(el => el.classList.remove('selected'));
-    }
-}
-
-function displayAllResults() {
-    searchTerm = '';
-    document.getElementById('searchInput').value = '';
-    performSearch();
-}
-
-function displayResults() {
-    const resultsContainer = document.getElementById('results');
-    const resultsCount = document.getElementById('resultsCount');
-
-    if (currentResults.length === 0) {
-        resultsContainer.innerHTML = `<div class="no-results"><div class="no-results-icon">📰</div><h3>No se encontraron resultados</h3><p>Intenta con otros términos de búsqueda, selecciona diferentes años, o navega por el calendario</p></div>`;
-        resultsCount.textContent = 'Sin resultados';
-        return;
-    }
-
-    const groupedResults = {};
-    currentResults.forEach(result => {
-        if (!groupedResults[result.PDF]) {
-            groupedResults[result.PDF] = { año: result.año, fecha: result.fecha_periodico, pdf: result.PDF, pdfDate: extractDateFromPDF(result.PDF), noticias: [] };
-        }
-        groupedResults[result.PDF].noticias.push(result);
-    });
-
-    const sortedGroups = Object.values(groupedResults).sort((a, b) => (a.pdfDate && b.pdfDate) ? a.pdfDate - b.pdfDate : b.año - a.año);
-
-    let html = '';
-    sortedGroups.forEach(group => {
-        const displayDate = group.pdfDate ? group.pdfDate.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : `${group.fecha} (${group.año})`;
-        html += `
-            <div class="result-item">
-                <div class="result-header">
-                    <div class="result-date">${displayDate}</div>
-                    <div class="result-meta">${group.noticias.length} noticia${group.noticias.length > 1 ? 's' : ''}</div>
-                </div>
-                <div class="result-content">
-                    ${group.noticias.map(noticia => {
-                        const firstPage = getFirstPage(noticia.pagina);
-                        return `
-                            <div class="news-item">
-                                <div class="news-text">${highlightText(noticia.texto_completo, noticia.searchTerms)}</div>
-                                <div class="news-page">
-                                    <a href="${noticia.PDF}#page=${firstPage}" target="_blank">Página ${firstPage}</a>
-                                </div>
-                            </div>`;
-                    }).join('')}
-                </div>
-            </div>`;
-    });
-
-    resultsContainer.innerHTML = html;
-    resultsCount.textContent = `${currentResults.length} noticia${currentResults.length > 1 ? 's' : ''} encontrada${currentResults.length > 1 ? 's' : ''} en ${selectedYears.length} año${selectedYears.length > 1 ? 's' : ''}`;
-}
-
-function highlightText(text, searchTerms) {
-    if (!searchTerms || searchTerms.length === 0) return text;
-    let highlightedText = text;
-    const normalizedText = normalizeText(text);
-    searchTerms.forEach(term => {
-        const normalizedTerm = normalizeText(term);
-        if (normalizedTerm.length === 0) return;
-        const regex = new RegExp(normalizedTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
-        let match;
-        while ((match = regex.exec(normalizedText)) !== null) {
-            const originalWord = text.substring(match.index, match.index + match[0].length);
-            highlightedText = highlightedText.split(originalWord).join(`<span class="highlight">${originalWord}</span>`);
-        }
-    });
-    return highlightedText;
-}
-
-function updateStats() {
-    let totalDaysInSelected = 0, totalNewsInSelected = 0;
-    allData.forEach(yearData => {
-        if (selectedYears.includes(parseInt(yearData.Año))) {
-            totalDaysInSelected += yearData.ejemplares?.length || 0;
-            totalNewsInSelected += yearData.ejemplares?.reduce((sum, ej) => sum + (ej.total_noticias || ej.noticias_musicales?.length || 0), 0) || 0;
-        }
-    });
-    const uniqueDates = new Set(currentResults.map(r => r.PDF));
-    document.getElementById('totalDays').textContent = totalDaysInSelected;
-    document.getElementById('totalNews').textContent = totalNewsInSelected;
-    document.getElementById('filteredDays').textContent = uniqueDates.size;
-    document.getElementById('filteredNews').textContent = currentResults.length;
-}
-
-function clearSearch() {
-    selectedDay = null;
-    document.querySelectorAll('.calendar-day.selected').forEach(el => el.classList.remove('selected'));
-    if (selectedYears.length !== availableYears.length) {
-        selectedYears = [...availableYears];
-        updateYearButtons();
-        updateCalendarForSelectedYears();
-    }
-    displayAllResults();
-}
-</script>
-</body>
-</html>
+       
