@@ -560,18 +560,146 @@ let availableYears = [];
 
 document.addEventListener('DOMContentLoaded', loadData);
 
+// Datos de ejemplo para demostración
+const sampleData = [
+    {
+        "Año": "1881",
+        "ejemplares": [
+            {
+                "PDF": "1881-01-15.pdf",
+                "fecha_periodico": "15 de enero de 1881",
+                "total_noticias": 3,
+                "noticias_musicales": [
+                    {
+                        "texto_completo": "El Teatro Real presenta esta noche la ópera 'La Traviata' de Giuseppe Verdi, con la participación de la soprano italiana María Rossi.",
+                        "pagina": "2"
+                    },
+                    {
+                        "texto_completo": "Gran concierto de piano en el Ateneo de Madrid, donde el maestro López interpretará obras de Chopin y Liszt.",
+                        "pagina": "3"
+                    }
+                ]
+            },
+            {
+                "PDF": "1881-02-20.pdf",
+                "fecha_periodico": "20 de febrero de 1881",
+                "total_noticias": 2,
+                "noticias_musicales": [
+                    {
+                        "texto_completo": "La zarzuela 'El barberillo de Lavapiés' se representa con gran éxito en el Teatro de la Zarzuela.",
+                        "pagina": "2"
+                    }
+                ]
+            },
+            {
+                "PDF": "1881-03-10.pdf",
+                "fecha_periodico": "10 de marzo de 1881",
+                "total_noticias": 1,
+                "noticias_musicales": [
+                    {
+                        "texto_completo": "Magnífico concierto de música de cámara en el Conservatorio, con obras de Mozart y Beethoven.",
+                        "pagina": "1"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Año": "1882",
+        "ejemplares": [
+            {
+                "PDF": "1882-05-12.pdf",
+                "fecha_periodico": "12 de mayo de 1882",
+                "total_noticias": 2,
+                "noticias_musicales": [
+                    {
+                        "texto_completo": "Estreno de la nueva ópera española 'Goyescas' en el Teatro Real, con gran acogida del público madrileño.",
+                        "pagina": "1"
+                    },
+                    {
+                        "texto_completo": "El famoso tenor Julián Gayarre interpretará arias de óperas italianas en el próximo concierto benéfico.",
+                        "pagina": "3"
+                    }
+                ]
+            },
+            {
+                "PDF": "1882-07-08.pdf",
+                "fecha_periodico": "8 de julio de 1882",
+                "total_noticias": 1,
+                "noticias_musicales": [
+                    {
+                        "texto_completo": "Festival de música popular en la Plaza Mayor, con participación de las mejores bandas de música de Madrid.",
+                        "pagina": "2"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Año": "1883",
+        "ejemplares": [
+            {
+                "PDF": "1883-04-25.pdf",
+                "fecha_periodico": "25 de abril de 1883",
+                "total_noticias": 3,
+                "noticias_musicales": [
+                    {
+                        "texto_completo": "Gran temporada de ópera italiana en el Teatro Real, que incluye obras de Rossini, Donizetti y Bellini.",
+                        "pagina": "1"
+                    },
+                    {
+                        "texto_completo": "Concierto extraordinario de la Orquesta Sinfónica de Madrid bajo la dirección del maestro Fernández Arbós.",
+                        "pagina": "2"
+                    },
+                    {
+                        "texto_completo": "La célebre pianista Clara Schumann ofrecerá un recital de obras de su esposo Robert Schumann.",
+                        "pagina": "4"
+                    }
+                ]
+            }
+        ]
+    }
+];
+
 async function loadData() {
     try {
+        // Intentar cargar el archivo real primero
         const response = await fetch('combined.json');
-        if (!response.ok) throw new Error(`Error al cargar el archivo: ${response.status}`);
-        allData = await response.json();
-        document.getElementById('loading').style.display = 'none';
-        document.getElementById('mainContent').style.display = 'flex';
-        initializeApp();
+        if (response.ok) {
+            allData = await response.json();
+            console.log('Datos cargados desde combined.json');
+        } else {
+            throw new Error('Archivo no encontrado');
+        }
     } catch (error) {
-        document.getElementById('loading').innerHTML = `
-            <div style="color: #dc3545;"><h3>❌ Error al cargar el archivo</h3><p>No se pudo cargar 'combined.json'. Asegúrate de que el archivo esté en la misma carpeta.</p><p style="font-size: 0.9rem; margin-top: 10px;">Error: ${error.message}</p></div>`;
+        // Si falla, usar datos de ejemplo
+        console.log('Usando datos de ejemplo:', error.message);
+        allData = sampleData;
+        
+        // Mostrar mensaje informativo
+        setTimeout(() => {
+            const loadingDiv = document.getElementById('loading');
+            loadingDiv.innerHTML = `
+                <div style="color: #28a745; text-align: center;">
+                    <h3>✅ Modo Demostración</h3>
+                    <p>Se están usando datos de ejemplo para mostrar la funcionalidad.</p>
+                    <p style="font-size: 0.9rem; margin-top: 10px;">Para usar tus datos reales, coloca el archivo 'combined.json' en la misma carpeta.</p>
+                    <button onclick="continueWithDemo()" style="margin-top: 15px; padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">Continuar con Demo</button>
+                </div>`;
+        }, 1000);
+        return;
     }
+    
+    // Si llegamos aquí, los datos se cargaron correctamente
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('mainContent').style.display = 'flex';
+    initializeApp();
+}
+
+function continueWithDemo() {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('mainContent').style.display = 'flex';
+    initializeApp();
 }
 
 function initializeApp() {
@@ -878,4 +1006,121 @@ function performSearch() {
                         ...noticia,
                         fecha_periodico: ejemplar.fecha_periodico,
                         PDF: ejemplar.PDF,
-       
+                        año: yearData.Año,
+                        searchTerms: searchTermsArray || []
+                    });
+                }
+            });
+        });
+    });
+    
+    displayResults();
+    updateStats();
+    generateCalendar();
+    
+    document.getElementById('resultsTitle').textContent = searchTerm ? `Resultados de búsqueda: "${searchTerm}"` : 'Todas las Noticias';
+}
+
+function displayAllResults() {
+    searchTerm = '';
+    selectedDay = null;
+    document.getElementById('searchInput').value = '';
+    document.querySelectorAll('.calendar-day.selected').forEach(el => el.classList.remove('selected'));
+    performSearch();
+}
+
+function displayResults() {
+    const resultsContainer = document.getElementById('results');
+    const resultsCount = document.getElementById('resultsCount');
+
+    if (currentResults.length === 0) {
+        resultsContainer.innerHTML = `<div class="no-results"><div class="no-results-icon">📰</div><h3>No se encontraron resultados</h3><p>Intenta con otros términos de búsqueda, selecciona diferentes años, o navega por el calendario</p></div>`;
+        resultsCount.textContent = 'Sin resultados';
+        return;
+    }
+
+    const groupedResults = {};
+    currentResults.forEach(result => {
+        if (!groupedResults[result.PDF]) {
+            groupedResults[result.PDF] = { año: result.año, fecha: result.fecha_periodico, pdf: result.PDF, pdfDate: extractDateFromPDF(result.PDF), noticias: [] };
+        }
+        groupedResults[result.PDF].noticias.push(result);
+    });
+
+    const sortedGroups = Object.values(groupedResults).sort((a, b) => (a.pdfDate && b.pdfDate) ? a.pdfDate - b.pdfDate : b.año - a.año);
+
+    let html = '';
+    sortedGroups.forEach(group => {
+        const displayDate = group.pdfDate ? group.pdfDate.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : `${group.fecha} (${group.año})`;
+        html += `
+            <div class="result-item">
+                <div class="result-header">
+                    <div class="result-date">${displayDate}</div>
+                    <div class="result-meta">${group.noticias.length} noticia${group.noticias.length > 1 ? 's' : ''}</div>
+                </div>
+                <div class="result-content">
+                    ${group.noticias.map(noticia => {
+                        const firstPage = getFirstPage(noticia.pagina);
+                        return `
+                            <div class="news-item">
+                                <div class="news-text">${highlightText(noticia.texto_completo, noticia.searchTerms)}</div>
+                                <div class="news-page">
+                                    <a href="${noticia.PDF}#page=${firstPage}" target="_blank">Página ${firstPage}</a>
+                                </div>
+                            </div>`;
+                    }).join('')}
+                </div>
+            </div>`;
+    });
+
+    resultsContainer.innerHTML = html;
+    resultsCount.textContent = `${currentResults.length} noticia${currentResults.length > 1 ? 's' : ''} encontrada${currentResults.length > 1 ? 's' : ''} en ${selectedYears.length} año${selectedYears.length > 1 ? 's' : ''}`;
+}
+
+function highlightText(text, searchTerms) {
+    if (!searchTerms || searchTerms.length === 0) return text;
+    let highlightedText = text;
+    const normalizedText = normalizeText(text);
+    searchTerms.forEach(term => {
+        const normalizedTerm = normalizeText(term);
+        if (normalizedTerm.length === 0) return;
+        const regex = new RegExp(normalizedTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+        let match;
+        while ((match = regex.exec(normalizedText)) !== null) {
+            const originalWord = text.substring(match.index, match.index + match[0].length);
+            highlightedText = highlightedText.split(originalWord).join(`<span class="highlight">${originalWord}</span>`);
+        }
+    });
+    return highlightedText;
+}
+
+function updateStats() {
+    let totalDaysInSelected = 0, totalNewsInSelected = 0;
+    allData.forEach(yearData => {
+        if (selectedYears.includes(parseInt(yearData.Año))) {
+            totalDaysInSelected += yearData.ejemplares?.length || 0;
+            totalNewsInSelected += yearData.ejemplares?.reduce((sum, ej) => sum + (ej.total_noticias || ej.noticias_musicales?.length || 0), 0) || 0;
+        }
+    });
+    const uniqueDates = new Set(currentResults.map(r => r.PDF));
+    document.getElementById('totalDays').textContent = totalDaysInSelected;
+    document.getElementById('totalNews').textContent = totalNewsInSelected;
+    document.getElementById('filteredDays').textContent = uniqueDates.size;
+    document.getElementById('filteredNews').textContent = currentResults.length;
+}
+
+function clearSearch() {
+    selectedDay = null;
+    searchTerm = '';
+    document.getElementById('searchInput').value = '';
+    document.querySelectorAll('.calendar-day.selected').forEach(el => el.classList.remove('selected'));
+    if (selectedYears.length !== availableYears.length) {
+        selectedYears = [...availableYears];
+        updateYearButtons();
+        updateCalendarForSelectedYears();
+    }
+    displayAllResults();
+}
+</script>
+</body>
+</html>
