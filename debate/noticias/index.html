@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Noticias musicales del Diario del Debate 1881-1883</title>
     <style>
-        /* Tu estilo original sin cambios */
         * {
             margin: 0;
             padding: 0;
@@ -560,158 +559,132 @@ let availableYears = [];
 
 document.addEventListener('DOMContentLoaded', loadData);
 
-// Datos de ejemplo para demostración
-const sampleData = [
-    {
-        "Año": "1881",
-        "ejemplares": [
-            {
-                "PDF": "1881-01-15.pdf",
-                "fecha_periodico": "15 de enero de 1881",
-                "total_noticias": 3,
-                "noticias_musicales": [
-                    {
-                        "texto_completo": "El Teatro Real presenta esta noche la ópera 'La Traviata' de Giuseppe Verdi, con la participación de la soprano italiana María Rossi.",
-                        "pagina": "2"
-                    },
-                    {
-                        "texto_completo": "Gran concierto de piano en el Ateneo de Madrid, donde el maestro López interpretará obras de Chopin y Liszt.",
-                        "pagina": "3"
-                    }
-                ]
-            },
-            {
-                "PDF": "1881-02-20.pdf",
-                "fecha_periodico": "20 de febrero de 1881",
-                "total_noticias": 2,
-                "noticias_musicales": [
-                    {
-                        "texto_completo": "La zarzuela 'El barberillo de Lavapiés' se representa con gran éxito en el Teatro de la Zarzuela.",
-                        "pagina": "2"
-                    }
-                ]
-            },
-            {
-                "PDF": "1881-03-10.pdf",
-                "fecha_periodico": "10 de marzo de 1881",
-                "total_noticias": 1,
-                "noticias_musicales": [
-                    {
-                        "texto_completo": "Magnífico concierto de música de cámara en el Conservatorio, con obras de Mozart y Beethoven.",
-                        "pagina": "1"
-                    }
-                ]
-            }
-        ]
-    },
-    {
-        "Año": "1882",
-        "ejemplares": [
-            {
-                "PDF": "1882-05-12.pdf",
-                "fecha_periodico": "12 de mayo de 1882",
-                "total_noticias": 2,
-                "noticias_musicales": [
-                    {
-                        "texto_completo": "Estreno de la nueva ópera española 'Goyescas' en el Teatro Real, con gran acogida del público madrileño.",
-                        "pagina": "1"
-                    },
-                    {
-                        "texto_completo": "El famoso tenor Julián Gayarre interpretará arias de óperas italianas en el próximo concierto benéfico.",
-                        "pagina": "3"
-                    }
-                ]
-            },
-            {
-                "PDF": "1882-07-08.pdf",
-                "fecha_periodico": "8 de julio de 1882",
-                "total_noticias": 1,
-                "noticias_musicales": [
-                    {
-                        "texto_completo": "Festival de música popular en la Plaza Mayor, con participación de las mejores bandas de música de Madrid.",
-                        "pagina": "2"
-                    }
-                ]
-            }
-        ]
-    },
-    {
-        "Año": "1883",
-        "ejemplares": [
-            {
-                "PDF": "1883-04-25.pdf",
-                "fecha_periodico": "25 de abril de 1883",
-                "total_noticias": 3,
-                "noticias_musicales": [
-                    {
-                        "texto_completo": "Gran temporada de ópera italiana en el Teatro Real, que incluye obras de Rossini, Donizetti y Bellini.",
-                        "pagina": "1"
-                    },
-                    {
-                        "texto_completo": "Concierto extraordinario de la Orquesta Sinfónica de Madrid bajo la dirección del maestro Fernández Arbós.",
-                        "pagina": "2"
-                    },
-                    {
-                        "texto_completo": "La célebre pianista Clara Schumann ofrecerá un recital de obras de su esposo Robert Schumann.",
-                        "pagina": "4"
-                    }
-                ]
-            }
-        ]
-    }
-];
-
 async function loadData() {
     try {
-        // Intentar cargar el archivo real primero
+        console.log('Intentando cargar combined.json...');
         const response = await fetch('combined.json');
-        if (response.ok) {
-            allData = await response.json();
-            console.log('Datos cargados desde combined.json');
-        } else {
-            throw new Error('Archivo no encontrado');
-        }
-    } catch (error) {
-        // Si falla, usar datos de ejemplo
-        console.log('Usando datos de ejemplo:', error.message);
-        allData = sampleData;
         
-        // Mostrar mensaje informativo
-        setTimeout(() => {
-            const loadingDiv = document.getElementById('loading');
-            loadingDiv.innerHTML = `
-                <div style="color: #28a745; text-align: center;">
-                    <h3>✅ Modo Demostración</h3>
-                    <p>Se están usando datos de ejemplo para mostrar la funcionalidad.</p>
-                    <p style="font-size: 0.9rem; margin-top: 10px;">Para usar tus datos reales, coloca el archivo 'combined.json' en la misma carpeta.</p>
-                    <button onclick="continueWithDemo()" style="margin-top: 15px; padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">Continuar con Demo</button>
-                </div>`;
-        }, 1000);
-        return;
+        console.log('Respuesta fetch:', response.status, response.statusText);
+        
+        if (!response.ok) {
+            throw new Error(`Error HTTP: ${response.status} - ${response.statusText}`);
+        }
+        
+        const jsonData = await response.json();
+        console.log('Datos JSON cargados:', jsonData);
+        console.log('Tipo de datos:', typeof jsonData);
+        console.log('Es array:', Array.isArray(jsonData));
+        console.log('Número de elementos:', jsonData?.length);
+        
+        if (!jsonData || !Array.isArray(jsonData) || jsonData.length === 0) {
+            throw new Error('El archivo combined.json está vacío o no tiene el formato correcto');
+        }
+        
+        allData = jsonData;
+        console.log('Datos asignados correctamente');
+        console.log('Estructura del primer elemento:', JSON.stringify(allData[0], null, 2));
+        
+        // Si es un objeto en lugar de array, convertirlo
+        if (!Array.isArray(allData)) {
+            console.log('Los datos no son un array, intentando convertir...');
+            if (typeof allData === 'object') {
+                // Si es un objeto con propiedades que son arrays
+                const possibleArrays = Object.values(allData).filter(val => Array.isArray(val));
+                if (possibleArrays.length > 0) {
+                    allData = possibleArrays[0];
+                    console.log('Convertido a array:', allData.length, 'elementos');
+                } else {
+                    // Si es un objeto único, ponerlo en un array
+                    allData = [allData];
+                    console.log('Objeto único convertido a array');
+                }
+            }
+        }
+        
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('mainContent').style.display = 'flex';
+        initializeApp();
+        
+    } catch (error) {
+        console.error('Error detallado al cargar combined.json:', error);
+        document.getElementById('loading').innerHTML = `
+            <div style="color: #dc3545; text-align: center;">
+                <h3>❌ Error al cargar el archivo</h3>
+                <p>No se pudo cargar 'combined.json'.</p>
+                <div style="background: #f8f9fa; padding: 15px; margin: 20px 0; border-radius: 5px; text-align: left;">
+                    <strong>Detalles técnicos:</strong><br>
+                    <code style="color: #dc3545;">${error.message}</code><br><br>
+                    <strong>Posibles causas:</strong><br>
+                    • El archivo 'combined.json' no está en la misma carpeta<br>
+                    • El archivo tiene un formato JSON inválido<br>
+                    • Problemas de permisos del servidor<br>
+                    • El archivo está vacío
+                </div>
+                <button onclick="location.reload()" style="margin-top: 15px; padding: 10px 20px; background: #2a5298; color: white; border: none; border-radius: 5px; cursor: pointer;">🔄 Reintentar</button>
+            </div>`;
     }
-    
-    // Si llegamos aquí, los datos se cargaron correctamente
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('mainContent').style.display = 'flex';
-    initializeApp();
-}
-
-function continueWithDemo() {
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('mainContent').style.display = 'flex';
-    initializeApp();
 }
 
 function initializeApp() {
-    availableYears = allData.map(yearData => parseInt(yearData.Año)).sort((a, b) => a - b);
-    // Por defecto, todos los años están seleccionados
-    selectedYears = [...availableYears];
-    currentCalendarYear = availableYears[0];
-    generateYearButtons();
-    generateCalendar();
-    updateStats();
-    displayAllResults();
-    setupEventListeners();
+    console.log('Inicializando aplicación con datos:', allData);
+    
+    try {
+        // Extraer años de los nombres de archivos PDF (tu estructura tiene "Año": "Díario del debate")
+        const yearSet = new Set();
+        
+        allData.forEach(item => {
+            console.log('Procesando item:', item);
+            
+            // Tu estructura tiene ejemplares directamente
+            if (item.ejemplares && Array.isArray(item.ejemplares)) {
+                console.log('Encontrados ejemplares:', item.ejemplares.length);
+                
+                item.ejemplares.forEach(ejemplar => {
+                    if (ejemplar.PDF) {
+                        const match = ejemplar.PDF.match(/(\d{4})-\d{2}-\d{2}\.pdf$/);
+                        if (match) {
+                            const year = parseInt(match[1]);
+                            yearSet.add(year);
+                            console.log('Año extraído del PDF:', year, 'desde', ejemplar.PDF);
+                        }
+                    }
+                });
+            }
+        });
+        
+        availableYears = Array.from(yearSet).sort((a, b) => a - b);
+        console.log('Años disponibles extraídos:', availableYears);
+        
+        if (availableYears.length === 0) {
+            throw new Error('No se pudieron extraer años válidos de los datos');
+        }
+        
+        // Reorganizar datos por año usando los años extraídos de los PDFs
+        reorganizeDataByYear();
+        
+        // Por defecto, todos los años están seleccionados
+        selectedYears = [...availableYears];
+        currentCalendarYear = availableYears[0];
+        
+        generateYearButtons();
+        generateCalendar();
+        
+        // Cargar TODAS las noticias por defecto
+        loadAllNews();
+        setupEventListeners();
+        
+        console.log('Aplicación inicializada correctamente');
+        console.log('Años seleccionados al inicio:', selectedYears);
+    } catch (error) {
+        console.error('Error al inicializar la aplicación:', error);
+        document.getElementById('loading').innerHTML = `
+            <div style="color: #dc3545; text-align: center;">
+                <h3>❌ Error al procesar los datos</h3>
+                <p>Los datos se cargaron pero tienen un formato incorrecto.</p>
+                <p style="font-size: 0.9rem; margin-top: 10px;">Error: ${error.message}</p>
+                <button onclick="location.reload()" style="margin-top: 15px; padding: 10px 20px; background: #2a5298; color: white; border: none; border-radius: 5px; cursor: pointer;">🔄 Reintentar</button>
+            </div>`;
+    }
 }
 
 function setupEventListeners() {
@@ -737,26 +710,39 @@ function setupEventListeners() {
 
 function executeSearch() {
     searchTerm = document.getElementById('searchInput').value;
-    // IMPORTANTE: Limpiar selección de día al hacer búsqueda
+    
+    // Limpiar selección de día al hacer búsqueda
     selectedDay = null;
     document.querySelectorAll('.calendar-day.selected').forEach(el => el.classList.remove('selected'));
-    performSearch();
+    
+    // Si no hay término de búsqueda y todos los años están seleccionados, mostrar todas las noticias
+    if (!searchTerm.trim() && selectedYears.length === availableYears.length) {
+        loadAllNews();
+    } else {
+        performSearch();
+    }
 }
 
 function generateYearButtons() {
     const yearButtonsContainer = document.getElementById('yearButtons');
     yearButtonsContainer.innerHTML = '';
+    
+    // Botón "Todos"
     const allBtn = document.createElement('button');
     allBtn.className = 'year-btn all-years active';
     allBtn.textContent = 'Todos';
     allBtn.onclick = () => selectAllYears();
     yearButtonsContainer.appendChild(allBtn);
+    
+    // Botón "Ninguno"
     const noneBtn = document.createElement('button');
     noneBtn.className = 'year-btn none-years';
     noneBtn.textContent = 'Ninguno';
     noneBtn.id = 'none-btn';
     noneBtn.onclick = () => selectNoYears();
     yearButtonsContainer.appendChild(noneBtn);
+    
+    // Botones para cada año
     availableYears.forEach(year => {
         const btn = document.createElement('button');
         btn.className = 'year-btn active';
@@ -768,34 +754,77 @@ function generateYearButtons() {
 }
 
 function selectAllYears() {
+    console.log('Seleccionando todos los años');
     selectedYears = [...availableYears];
+    
+    // Limpiar búsqueda y selección de día para mostrar TODO
+    searchTerm = '';
+    selectedDay = null;
+    document.getElementById('searchInput').value = '';
+    document.querySelectorAll('.calendar-day.selected').forEach(el => el.classList.remove('selected'));
+    
     updateYearButtons();
     updateCalendarForSelectedYears();
-    performSearch();
+    
+    // Cargar todas las noticias
+    loadAllNews();
+    
+    console.log('Todos los años seleccionados:', selectedYears);
 }
 
 function selectNoYears() {
     selectedYears = [];
     updateYearButtons();
     updateCalendarForSelectedYears();
-    performSearch();
+    
+    // Limpiar resultados cuando no hay años seleccionados
+    currentResults = [];
+    displayResults();
+    updateStats();
 }
 
 function toggleYear(year) {
     const index = selectedYears.indexOf(year);
     if (index > -1) selectedYears.splice(index, 1);
     else selectedYears.push(year);
+    
     updateYearButtons();
     updateCalendarForSelectedYears();
-    performSearch();
+    
+    // Si todos los años están seleccionados, mostrar todas las noticias
+    if (selectedYears.length === availableYears.length) {
+        loadAllNews();
+    } else {
+        performSearch();
+    }
 }
 
 function updateYearButtons() {
-    document.querySelector('.year-btn.all-years').classList.toggle('active', selectedYears.length === availableYears.length);
-    document.querySelector('.year-btn.none-years').classList.toggle('active', selectedYears.length === 0);
+    const allBtn = document.querySelector('.year-btn.all-years');
+    const noneBtn = document.querySelector('.year-btn.none-years');
+    
+    const allYearsSelected = selectedYears.length === availableYears.length;
+    const noYearsSelected = selectedYears.length === 0;
+    
+    if (allBtn) {
+        allBtn.classList.toggle('active', allYearsSelected);
+    }
+    if (noneBtn) {
+        noneBtn.classList.toggle('active', noYearsSelected);
+    }
+    
     availableYears.forEach(year => {
-        document.getElementById(`year-${year}`).classList.toggle('active', selectedYears.includes(year));
+        const btn = document.getElementById(`year-${year}`);
+        if (btn) {
+            btn.classList.toggle('active', selectedYears.includes(year));
+        }
     });
+    
+    // Si todos los años están seleccionados y no hay búsqueda activa, mostrar todas las noticias
+    if (allYearsSelected && !searchTerm.trim() && !selectedDay) {
+        console.log('Todos los años seleccionados - mostrando todas las noticias');
+        loadAllNews();
+    }
 }
 
 function updateCalendarForSelectedYears() {
@@ -825,8 +854,8 @@ function changeYear(direction) {
     if (newIndex >= 0 && newIndex < sortedSelectedYears.length) {
         currentCalendarYear = sortedSelectedYears[newIndex];
         generateCalendar();
-        if (!searchTerm) {
-            displayAllResults(); // Update results to match calendar view if not searching
+        if (!searchTerm && !selectedDay) {
+            loadAllNews(); // Mostrar todas las noticias si no hay búsqueda ni día seleccionado
         }
     }
 }
@@ -874,24 +903,29 @@ function generateCalendar() {
     document.getElementById('yearSelector').addEventListener('change', (e) => {
         currentCalendarYear = parseInt(e.target.value);
         generateCalendar();
-        if (!searchTerm) {
-            displayAllResults();
+        if (!searchTerm && !selectedDay) {
+            loadAllNews(); // Mostrar todas las noticias si no hay búsqueda ni día seleccionado
         }
     });
 
     const yearData = allData.find(data => parseInt(data.Año) === currentCalendarYear);
     const newsByDay = {}; // { 0: { 15: { count: 5, ejemplares: [] } } }
 
-    if (yearData && yearData.ejemplares) {
+    if (yearData) {
         const searchTermsArray = searchTerm.trim() ? searchTerm.split(/\s+/).filter(Boolean) : null;
-        yearData.ejemplares.forEach(ejemplar => {
+        
+        // Manejar tanto la estructura con ejemplares como items individuales
+        const ejemplares = yearData.ejemplares || [yearData];
+        
+        ejemplares.forEach(ejemplar => {
             const pdfDate = extractDateFromPDF(ejemplar.PDF);
             if (!pdfDate) return;
             const month = pdfDate.getMonth();
             const day = pdfDate.getDate();
+            const noticiasArray = ejemplar.noticias_musicales || [];
             const matchingNews = searchTermsArray 
-                ? ejemplar.noticias_musicales?.filter(noticia => matchesSearch(noticia.texto_completo, searchTermsArray)) || []
-                : ejemplar.noticias_musicales || [];
+                ? noticiasArray.filter(noticia => matchesSearch(noticia.texto_completo, searchTermsArray))
+                : noticiasArray;
             if (matchingNews.length > 0) {
                 if (!newsByDay[month]) newsByDay[month] = {};
                 if (!newsByDay[month][day]) newsByDay[month][day] = { count: 0, ejemplares: [] };
@@ -982,12 +1016,68 @@ function matchesSearch(text, searchTerms) {
     return searchTerms.every(term => normalizedText.includes(normalizeText(term)));
 }
 
+function reorganizeDataByYear() {
+    console.log('Reorganizando datos por año...');
+    console.log('Estructura original de allData:', allData);
+    
+    // Tu estructura específica: array con un objeto que contiene ejemplares
+    if (allData.length > 0 && allData[0].ejemplares) {
+        console.log('Detectada estructura con ejemplares, reorganizando por año...');
+        
+        const dataByYear = {};
+        
+        // Procesar cada item del array principal
+        allData.forEach(item => {
+            if (item.ejemplares && Array.isArray(item.ejemplares)) {
+                item.ejemplares.forEach(ejemplar => {
+                    // Extraer año del nombre del PDF
+                    const match = ejemplar.PDF?.match(/(\d{4})-\d{2}-\d{2}\.pdf$/);
+                    if (match) {
+                        const year = parseInt(match[1]);
+                        
+                        if (!dataByYear[year]) {
+                            dataByYear[year] = { 
+                                Año: year, 
+                                ejemplares: [] 
+                            };
+                        }
+                        
+                        dataByYear[year].ejemplares.push(ejemplar);
+                        console.log(`Agregado ejemplar ${ejemplar.PDF} al año ${year}`);
+                    }
+                });
+            }
+        });
+        
+        // Convertir a array organizado por años
+        allData = Object.values(dataByYear);
+        console.log('Datos reorganizados por año:', allData);
+        console.log('Años encontrados:', Object.keys(dataByYear));
+        
+        return;
+    }
+    
+    console.log('Los datos ya están organizados correctamente o tienen estructura diferente');
+}
+
 function performSearch() {
+    console.log('Realizando búsqueda...');
+    console.log('Término de búsqueda:', searchTerm);
+    console.log('Años seleccionados:', selectedYears);
+    
     // Si hay un día seleccionado y no hay búsqueda, mostrar solo ese día
     if (selectedDay && !searchTerm.trim()) {
-        // Los resultados ya están establecidos en selectDay()
+        console.log('Mostrando día seleccionado');
         displayResults();
         updateStats();
+        generateCalendar();
+        return;
+    }
+    
+    // Si no hay búsqueda y todos los años están seleccionados, mostrar todas las noticias
+    if (!searchTerm.trim() && selectedYears.length === availableYears.length) {
+        console.log('Mostrando todas las noticias (todos los años seleccionados)');
+        loadAllNews();
         generateCalendar();
         return;
     }
@@ -996,11 +1086,23 @@ function performSearch() {
     const searchTermsArray = searchTerm.trim() ? searchTerm.split(/\s+/).filter(Boolean) : null;
     currentResults = [];
     
+    console.log('Procesando búsqueda o filtros específicos...');
+    
     allData.forEach(yearData => {
         const yearValue = parseInt(yearData.Año);
-        if (!selectedYears.includes(yearValue)) return;
-        yearData.ejemplares?.forEach(ejemplar => {
-            ejemplar.noticias_musicales?.forEach(noticia => {
+        if (!selectedYears.includes(yearValue)) {
+            console.log(`Saltando año ${yearValue} (no seleccionado)`);
+            return;
+        }
+        
+        console.log(`Procesando año ${yearValue}`);
+        
+        // Manejar tanto la estructura con ejemplares como items individuales
+        const ejemplares = yearData.ejemplares || [yearData];
+        
+        ejemplares.forEach(ejemplar => {
+            const noticiasArray = ejemplar.noticias_musicales || [];
+            noticiasArray.forEach(noticia => {
                 if (!searchTermsArray || matchesSearch(noticia.texto_completo, searchTermsArray)) {
                     currentResults.push({
                         ...noticia,
@@ -1014,24 +1116,129 @@ function performSearch() {
         });
     });
     
+    console.log(`Total de resultados encontrados: ${currentResults.length}`);
+    
     displayResults();
     updateStats();
     generateCalendar();
     
-    document.getElementById('resultsTitle').textContent = searchTerm ? `Resultados de búsqueda: "${searchTerm}"` : 'Todas las Noticias';
+    // Actualizar título según el contexto
+    let title;
+    if (searchTerm) {
+        title = `Resultados de búsqueda: "${searchTerm}"`;
+    } else if (selectedYears.length === availableYears.length) {
+        title = 'Todas las Noticias';
+    } else if (selectedYears.length === 1) {
+        title = `Noticias de ${selectedYears[0]}`;
+    } else {
+        title = `Noticias de ${selectedYears.length} años seleccionados`;
+    }
+    
+    document.getElementById('resultsTitle').textContent = title;
+}
+
+function loadAllNews() {
+    console.log('=== INICIANDO CARGA DE TODAS LAS NOTICIAS ===');
+    console.log('Años seleccionados:', selectedYears);
+    console.log('Estructura de allData:', allData);
+    console.log('Cantidad de elementos en allData:', allData.length);
+    
+    currentResults = [];
+    
+    if (!allData || allData.length === 0) {
+        console.error('allData está vacío o no existe');
+        displayResults();
+        updateStats();
+        return;
+    }
+    
+    // Recopilar todas las noticias de todos los años seleccionados
+    allData.forEach((yearData, index) => {
+        console.log(`\n--- Procesando elemento ${index} ---`);
+        console.log('Datos del año:', yearData);
+        
+        const yearValue = parseInt(yearData.Año);
+        console.log('Año extraído:', yearValue);
+        
+        if (!selectedYears.includes(yearValue)) {
+            console.log(`Saltando año ${yearValue} (no seleccionado)`);
+            return;
+        }
+        
+        console.log(`✓ Procesando año ${yearValue} (seleccionado)`);
+        
+        const ejemplares = yearData.ejemplares || [yearData];
+        console.log('Ejemplares encontrados:', ejemplares.length);
+        
+        ejemplares.forEach((ejemplar, ejIndex) => {
+            console.log(`  Ejemplar ${ejIndex}:`, {
+                PDF: ejemplar.PDF,
+                fecha: ejemplar.fecha_periodico,
+                noticias: ejemplar.noticias_musicales?.length || 0
+            });
+            
+            const noticiasArray = ejemplar.noticias_musicales || [];
+            
+            if (noticiasArray.length === 0) {
+                console.log('    No hay noticias musicales en este ejemplar');
+                return;
+            }
+            
+            noticiasArray.forEach((noticia, notIndex) => {
+                console.log(`    Agregando noticia ${notIndex}:`, {
+                    texto: noticia.texto_completo?.substring(0, 50) + '...',
+                    pagina: noticia.pagina
+                });
+                
+                currentResults.push({
+                    ...noticia,
+                    fecha_periodico: ejemplar.fecha_periodico,
+                    PDF: ejemplar.PDF,
+                    año: yearData.Año,
+                    searchTerms: []
+                });
+            });
+        });
+    });
+    
+    console.log(`\n=== RESUMEN ===`);
+    console.log(`Total de noticias cargadas: ${currentResults.length}`);
+    console.log('Primeras 3 noticias:', currentResults.slice(0, 3));
+    
+    // Ordenar por fecha (más recientes primero o por orden cronológico)
+    currentResults.sort((a, b) => {
+        const dateA = extractDateFromPDF(a.PDF);
+        const dateB = extractDateFromPDF(b.PDF);
+        if (dateA && dateB) {
+            return dateA - dateB; // Orden cronológico (más antiguas primero)
+        }
+        return 0;
+    });
+    
+    // Mostrar todas las noticias
+    displayResults();
+    updateStats();
+    
+    // Establecer título por defecto
+    document.getElementById('resultsTitle').textContent = 'Todas las Noticias';
 }
 
 function displayAllResults() {
+    console.log('Mostrando todos los resultados');
     searchTerm = '';
     selectedDay = null;
     document.getElementById('searchInput').value = '';
     document.querySelectorAll('.calendar-day.selected').forEach(el => el.classList.remove('selected'));
-    performSearch();
+    
+    // Usar la nueva función para cargar todas las noticias
+    loadAllNews();
 }
 
 function displayResults() {
     const resultsContainer = document.getElementById('results');
     const resultsCount = document.getElementById('resultsCount');
+
+    console.log(`Mostrando ${currentResults.length} resultados`);
 
     if (currentResults.length === 0) {
         resultsContainer.innerHTML = `<div class="no-results"><div class="no-results-icon">📰</div><h3>No se encontraron resultados</h3><p>Intenta con otros términos de búsqueda, selecciona diferentes años, o navega por el calendario</p></div>`;
@@ -1074,7 +1281,15 @@ function displayResults() {
     });
 
     resultsContainer.innerHTML = html;
-    resultsCount.textContent = `${currentResults.length} noticia${currentResults.length > 1 ? 's' : ''} encontrada${currentResults.length > 1 ? 's' : ''} en ${selectedYears.length} año${selectedYears.length > 1 ? 's' : ''}`;
+    
+    let countText;
+    if (selectedYears.length === availableYears.length) {
+        countText = `${currentResults.length} noticia${currentResults.length > 1 ? 's' : ''} encontrada${currentResults.length > 1 ? 's' : ''} en total`;
+    } else {
+        countText = `${currentResults.length} noticia${currentResults.length > 1 ? 's' : ''} encontrada${currentResults.length > 1 ? 's' : ''} en ${selectedYears.length} año${selectedYears.length > 1 ? 's' : ''}`;
+    }
+    
+    resultsCount.textContent = countText;
 }
 
 function highlightText(text, searchTerms) {
@@ -1098,8 +1313,12 @@ function updateStats() {
     let totalDaysInSelected = 0, totalNewsInSelected = 0;
     allData.forEach(yearData => {
         if (selectedYears.includes(parseInt(yearData.Año))) {
-            totalDaysInSelected += yearData.ejemplares?.length || 0;
-            totalNewsInSelected += yearData.ejemplares?.reduce((sum, ej) => sum + (ej.total_noticias || ej.noticias_musicales?.length || 0), 0) || 0;
+            // Manejar tanto la estructura con ejemplares como items individuales
+            const ejemplares = yearData.ejemplares || [yearData];
+            totalDaysInSelected += ejemplares.length;
+            totalNewsInSelected += ejemplares.reduce((sum, ej) => {
+                return sum + (ej.total_noticias || ej.noticias_musicales?.length || 0);
+            }, 0);
         }
     });
     const uniqueDates = new Set(currentResults.map(r => r.PDF));
@@ -1110,16 +1329,21 @@ function updateStats() {
 }
 
 function clearSearch() {
+    console.log('Limpiando búsqueda y filtros');
     selectedDay = null;
     searchTerm = '';
     document.getElementById('searchInput').value = '';
     document.querySelectorAll('.calendar-day.selected').forEach(el => el.classList.remove('selected'));
+    
+    // Restaurar todos los años como seleccionados
     if (selectedYears.length !== availableYears.length) {
         selectedYears = [...availableYears];
         updateYearButtons();
         updateCalendarForSelectedYears();
     }
-    displayAllResults();
+    
+    // Cargar todas las noticias
+    loadAllNews();
 }
 </script>
 </body>
